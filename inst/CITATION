@@ -1,0 +1,16 @@
+bibentry(
+    bibtype = "article",
+    title = "Baseline and power analyses for the assessment of beach litter reductions in the European OSPAR region",
+    author = c(
+        person("Marcus", "Schulz"),
+        person("Dennis", "Walvoort"),
+        person("Jon", "Barry"),
+        person("David", "Fleet"),
+        person("Willem", "van Loon")),
+    year = 2019,
+    volume = 248,
+    pages = "555--564",
+    journal = "Environmental Pollution",
+    doi = "10.1016/j.envpol.2019.02.030",
+    url = "https://CRAN.R-project.org/package=litteR"
+)

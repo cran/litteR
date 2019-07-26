@@ -1,0 +1,105 @@
+## Baseline analysis
+
+The figures below show the [arithmetic mean](https://en.wikipedia.org/wiki/Arithmetic_mean) as [rolling statistic](https://en.wikipedia.org/wiki/Moving_average) as function of window size, _i.e._ the number of consecutive years, for each location. Each dot in the plot represents an estimate of the mean abundance within a single moving window. 
+
+The following procedure has been followed to produce these plots:
+
+1. Start with a window size of one year. One year usually corresponds to four surveys;
+1. For each selected litter type, move the window over its time series. The step size is equal to one survey.
+1. During each step, two statistics are computed for the survey data within the window:
+    + the mean abundance;
+    + the number of days spanned by the window, _i.e._ the window size. The window size will vary because the surveys are not equidistant in time;
+1. increase the window size by one survey and repeat the procedure above until the maximum window size has been reached (depends on the available input data).
+
+
+```{r}
+# number of days spanned by a vector of dates
+n_days <- function(x) {
+    x %>%
+        as.integer %>%
+        range %>%
+        diff
+}
+
+# apply rolling statistics
+stats <- c("mean", "median")
+d <- stats %>%
+    map_df(function(stat) {
+        d_ltr %>%
+            split(group_indices(., type_name, region_name, country_code, location_name)) %>%
+            map_df(function(x) {
+                n <- nrow(x)# - 4L
+                if (n < 4) {
+                    message(
+                        "Insufficient data for location %s" %>% 
+                            sprintf(sQuote(x$location_name[1])))
+                    return(NULL)
+                }
+                4:n %>%
+                    map_df(function(n_surveys) {
+                        x %>%
+                            arrange(date) %>%
+                            summarise(
+                                n_days = list(date %>% roll(n_surveys, n_days)),
+                                value = list(abundance %>% roll(n_surveys, get(stat)))) %>%
+                            unnest %>%
+                            mutate(type_name = x$type_name[1], region_name = x$region_name[1], 
+                                   country_code = x$country_code[1], location_name = x$location_name[1], 
+                                   ranking = x$ranking[1], n_surveys = n_surveys, stat = stat)
+                    })
+            })
+    }) %>%
+    mutate(n_years = n_days / 365.25)
+```
+
+
+```{r, fig.width=7, fig.height=4, out.width=730}
+d %>%
+    filter(stat == "mean") %>%
+    split(group_indices(., ranking, type_name, region_name, country_code, location_name)) %>%
+    walk(function(x) {
+        g <- ggplot(data = x, mapping = aes(x = n_years, y = value)) +
+            geom_point(alpha = 0.5) +
+            scale_x_continuous(name = "number of years", limits = c(0, NA)) +
+            scale_y_continuous(name = "mean abundance", limits = c(0, NA)) +
+            ggtitle(str_c(x$country_code[1], x$location_name[1], x$type_name[1], sep = "  "))
+        print(g)
+    }) 
+```
+
+
+<p><br/></p>
+
+The tables below give for each litter type, location and number of years (# years), the mean, the standard deviation (sd), the [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (CV), the median, the median absolute deviation ([MAD](https://en.wikipedia.org/wiki/Median_absolute_deviation)), and the ratio of MAD to median (RMAD) of two baseline statistics (stat), _i.e._ the mean abundance and the median abundance. The mean abundance was also plotted above.
+
+```{r, include=TRUE, results="asis"}
+d %>%
+    group_by(type_name) %>%
+    summarise(mean_ranking = mean(ranking)) %>%
+    right_join(d, by = "type_name") %>%
+    left_join(
+        d_all %>% 
+            mutate(type_code = get_type_code(type_name)) %>%
+            select(type_code, type_name), 
+        by = "type_name") %>%
+    mutate(n_years = n_years %>% round %>% as.integer) %>%
+    group_by(mean_ranking, type_name, region_name, country_code, location_name, stat, n_years) %>%
+    summarise(
+        mean = mean(value), 
+        sd = sd(value),
+        CV = cv(value),
+        median = median(value), 
+        MAD = mad(value),
+        RMAD = rmad(value)) %>%
+    ungroup %>%
+    rename(`# years` = n_years) %>%
+    split(group_indices(., mean_ranking, type_name)) %>%
+    walk(function(x) {
+        cat(sprintf("\n\n\n### %s\n", x$type_name[1]))
+        x %>% 
+            select(-mean_ranking, -type_name, -sd, -RMAD) %>%
+            mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+            kable(align = "llllrrrrr") %>%
+            print
+    })
+```

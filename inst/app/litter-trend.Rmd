@@ -1,0 +1,89 @@
+## Trend analysis
+
+For each location and litter type, the following statistics will be estimated for the period `r str_c(DATE_FROM, " to ", DATE_TO)`:
+
+- from: the first date of the time-series;
+- to: the final date of the time-series;
+- [Theil-Sen slope](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) (slope): a robust non-parametric estimator of slope (counts / year);
+- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed [Mann-Kendall test](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) to test the null hypothesis of 
+    - no monotonically _increasing_ trend in case the Theil-Sen slope is greater than zero;
+    - no monotonically _decreasing_ trend in case the Theil-Sen slope is smaller than zero;
+- the number of surveys (N);
+
+The Mann-Kendall test is a non-parametric test and as such does not make distributional assumptions on the data. 
+
+<br/>
+<br/>
+
+```{r}
+# create table with summary statistics
+d_stats %>%
+    filter(type_code %in% TYPE_CODE) %>%
+    group_by(type_name) %>%
+    mutate(mean_ranking = mean(ranking)) %>%
+    ungroup %>%
+    arrange(desc(is_group_code(type_code)), mean_ranking, region_name, country_code, location_name) %>%
+    mutate(
+        p_value = formatC(p_value, format = "f", digits = 3),
+        slope = b1 * 365.25) %>%
+    select(location_name, type_name, from, to, slope, `p-value` = p_value, N = n) %>%
+    mutate_if(
+        is_double,
+        formatC, format = "fg", digits = 3) %>%
+    kable(align = "llllrrr")
+```
+
+
+<p><br/></p>
+
+
+Time-series of the selected litter types are given in the plots below, including trend line and smoother.
+
+The lines and dots have the following meaning:
+
+- dots: observations;
+- thin gray line segments: auxiliary line segments to guide the eye (only given for 5 or more points);
+- blue line: [loess-smoother](https://en.wikipedia.org/wiki/Local_regression). It is only given for 18 or more points;
+- red line: Theil-Sen trend line (its slope is given in the table above). It is only given for 5 or more points.
+
+> Descriptive statisics and trend analysis results have been stored in file `r sQuote(basename(STATS_FILE_NAME))`.
+
+
+```{r fig.width=6, fig.height=4, out.width=730}
+d_ltr %>%
+    select(region_name, country_code, location_name, date, type_name, abundance) %>%
+    left_join(d_stats, by = c("region_name", "country_code", "location_name", "type_name")) %>%
+    arrange(ranking) %>%
+    split(group_indices(., region_name, country_code, location_name, type_name)) %>%
+    map_df(function(x) {
+        g <- ggplot(data = x, mapping = aes(x = date, y = abundance)) +
+                geom_point() +
+                scale_x_date(name = "", limits = c(DATE_FROM, DATE_TO)) +
+                ggtitle(str_c(x$location_name[1], x$type_name[1], sep = "  "))
+        if (nrow(x) >= 5L) {
+            d <- tibble(date = range(x$date)) %>%
+                mutate(abundance = x$b0[1] + x$b1[1] * as.numeric(date))
+            g <- g + 
+                geom_path(size = 0.5, colour = "gray") +
+                geom_point() +
+                geom_path(
+                    data = d, 
+                    mapping = aes(x = date, y = abundance),
+                    colour = "red", size = 1.0)
+            if (nrow(x) >= 18L) {
+                g <- g +        
+                    geom_smooth(method = "loess", se = FALSE, colour = "blue", size = 0.5)
+            }
+        }
+        tibble(
+            g = list(g), 
+            ranking = x$ranking[1], 
+            region_name = x$region_name[1],
+            country_code = x$country_code[1],
+            location_name = x$location_name[1], 
+            type_name = x$type_name[1])
+    }) %>%
+    arrange(desc(is_group_code(type_name)), location_name, ranking, type_name) %>%
+    pull("g") %>%
+    walk(print)
+```

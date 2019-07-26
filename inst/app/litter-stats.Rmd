@@ -1,0 +1,152 @@
+## Descriptive statistics
+
+For each location and litter type, the following statistics will be estimated for the period `r str_c(DATE_FROM, DATE_TO, sep = " to ")`:
+
+-  mean abundance (mean):, _i.e._, [the arithmetic mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of the counts for each litter type;
+- median abundance (median), _i.e._, the [median](https://en.wikipedia.org/wiki/Median) of the counts for each litter type;
+- relative abundance (rel.abund.): the contribution of each litter type to the total abundance of litter types (%);
+- [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (CV): the ratio of the standard deviation to the mean of the counts for each litter type (%);
+- ratio of the [MAD](https://en.wikipedia.org/wiki/Median_absolute_deviation) and the [median](https://en.wikipedia.org/wiki/Median) (RMAD, %);
+- number of surveys (N);
+
+These statistics will be estimated for types with the greatest abundances making up `r PERCENTAGE_TOTAL_ABUNDANCE`% of the total abundance for each location.
+
+> These statisics have been stored in file `r sQuote(basename(STATS_FILE_NAME))`.
+
+
+```{r}
+
+# aggregation to various spatial scales
+
+d_assessment_location <- d_stats %>%
+    filter(topx | type_name == type_code) %>%
+    mutate(RMAD = rmad * 100, CV = cv * 100) %>%
+    select(country_code, region_name, location_name, type_name, from, to,
+           mean, median, `rel.abund.` = perc_abundance, CV, RMAD, N = n)
+
+d <- d_assessment_location %>%
+    select(-from, -to, -location_name)
+
+d_assessment_country_region <- d %>%
+    group_by(country_code, region_name, type_name) %>%
+    summarise_all(mean) %>%
+    ungroup
+
+show_country_region_level <- (d %>%
+    group_by(country_code, region_name) %>%
+    summarise(n = n()) %>%
+    nrow) > 1
+
+d_assessment_country <- d %>%
+    select(-region_name) %>%
+    group_by(country_code, type_name) %>%
+    summarise_all(mean) %>%
+    ungroup 
+
+d_assessment_regional <- d %>%
+    select(-country_code) %>%
+    group_by(region_name, type_name) %>%
+    summarise_all(mean) %>%
+    ungroup
+```
+
+
+Furthermore, these statistics are averaged for `r if_else(show_country_region_level, "four", "three")` spatial scales. These results are given below.
+
+
+### Location level
+
+#### Groups
+
+```{r}
+d_assessment_location %>%
+    select(-country_code, -region_name) %>%
+    filter(is_group_code(type_name)) %>%
+    arrange(desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "llllrrrrrr")
+```
+
+#### Types
+
+```{r}
+d_assessment_location %>%
+    select(-country_code, -region_name) %>%
+    filter(!is_group_code(type_name)) %>%
+    arrange(desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "llllrrrrrr")
+```
+
+
+```{r eval=show_country_region_level, results='asis'}
+cat("### Country-regional level\n")
+cat("#### Groups\n")
+```
+
+```{r eval=show_country_region_level}
+d_assessment_country_region %>%
+    filter(is_group_code(type_name)) %>%
+    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "lllrrrrrr")
+```
+
+```{r eval=show_country_region_level, results='asis'}
+cat("#### Types\n")
+```
+
+```{r eval=show_country_region_level}
+d_assessment_country_region %>%
+    filter(!is_group_code(type_name)) %>%
+    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "lllrrrrrr")
+```
+
+
+### Country level
+
+#### Groups
+
+```{r}
+d_assessment_country %>%
+    filter(is_group_code(type_name)) %>%
+    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "llrrrrrr")
+```
+
+#### Types
+
+```{r}
+d_assessment_country %>%
+    filter(!is_group_code(type_name)) %>%
+    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "llrrrrrr")
+```
+
+
+### Regional level
+
+#### Groups
+
+```{r message=FALSE}
+d_assessment_regional %>%
+    filter(is_group_code(type_name)) %>%
+    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "llrrrrrr")
+```
+
+
+#### Types
+
+```{r message=FALSE}
+d_assessment_regional %>%
+    filter(!is_group_code(type_name)) %>%
+    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
+    kable(align = "llrrrrrr")
+```
