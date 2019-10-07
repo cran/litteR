@@ -4,14 +4,10 @@
 \alias{litter}
 \title{Graphical User Interface to the litteR-package}
 \usage{
-litter(file_settings = NULL, file_input = NULL, dir_output = NULL)
+litter(file = NULL)
 }
 \arguments{
-\item{file_settings}{file containing settings}
-
-\item{file_input}{file containing litter data}
-
-\item{dir_output}{directory to store output}
+\item{file}{file containing litter data (see vignette for details)}
 }
 \value{
 An HTML-document in which all the litter analysis results 

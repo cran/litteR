@@ -18,7 +18,7 @@ The Mann-Kendall test is a non-parametric test and as such does not make distrib
 ```{r}
 # create table with summary statistics
 d_stats %>%
-    filter(type_code %in% TYPE_CODE) %>%
+    filter(type_code %in% TYPE_CODES) %>%
     group_by(type_name) %>%
     mutate(mean_ranking = mean(ranking)) %>%
     ungroup %>%
@@ -26,11 +26,11 @@ d_stats %>%
     mutate(
         p_value = formatC(p_value, format = "f", digits = 3),
         slope = b1 * 365.25) %>%
-    select(location_name, type_name, from, to, slope, `p-value` = p_value, N = n) %>%
+    select(country_code, location_name, type_name, from, to, slope, `p-value` = p_value, N = n) %>%
     mutate_if(
         is_double,
         formatC, format = "fg", digits = 3) %>%
-    kable(align = "llllrrr")
+    kable(align = "lllllrrr")
 ```
 
 
@@ -61,10 +61,13 @@ d_ltr %>%
                 scale_x_date(name = "", limits = c(DATE_FROM, DATE_TO)) +
                 ggtitle(str_c(x$location_name[1], x$type_name[1], sep = "  "))
         if (nrow(x) >= 5L) {
+            if (nrow(x) <= 24L) {
+                g <- g +        
+                    geom_path(size = 0.5, colour = "gray")
+            }
             d <- tibble(date = range(x$date)) %>%
                 mutate(abundance = x$b0[1] + x$b1[1] * as.numeric(date))
             g <- g + 
-                geom_path(size = 0.5, colour = "gray") +
                 geom_point() +
                 geom_path(
                     data = d, 

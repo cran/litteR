@@ -18,7 +18,7 @@ editor_options:
   chunk_output_type: console
 params:
   analyst_name:
-    label: Your name
+    label: "Your name:"
     value: "not specified"
     placeholder: "Enter your name"
     input: text
@@ -32,10 +32,10 @@ params:
     value: ""
     placeholder: "Enter name of litter file"
     input: file
-  file_baseline: 
-    label: "Baseline file:"
+  file_groups: 
+    label: "Group file:"
     value: ""
-    placeholder: "Enter name of file with baseline values"
+    placeholder: "Enter name of file with group definitions"
     input: file
   module_stats:
     label: "Descriptive statistics"
@@ -43,10 +43,6 @@ params:
     input: checkbox
   module_trend:
     label: "Trend analysis"
-    value: TRUE
-    input: checkbox
-  module_assessment:
-    label: "Threshold assessment"
     value: TRUE
     input: checkbox
   module_baseline:
@@ -115,8 +111,8 @@ params:
     step: 1
     width: 200
     input: numeric
-  litter_type:
-    label: Litter type
+  litter_types:
+    label: Litter types
     value: [[TA], [49]]
     choices: ['[TA]', '[15]','[19]','[45]']
     input: select
@@ -126,18 +122,6 @@ params:
     value: FALSE
     input: checkbox
   image_quality:
-    label: "image quality"
-    value: "high"
-    input: text
-  assessment_statistic:
-    label: "assessment value type"
-    value: "median"
-    input: text
-  threshold_type:
-    label: "threshold type"
-    value: 15
-    input: text
-  threshold_value:
     label: "image quality"
     value: "high"
     input: text
@@ -152,27 +136,30 @@ knitr::opts_knit$set(
 )
 
 # make sure all table columns are visible
-options(dplyr.width = Inf)
+options(dplyr.width = Inf, warning.length = 8000)
 ```
 
 
 
-```{r, message=FALSE, echo=params$show_source_code}
+```{r, include=FALSE, message=FALSE, warning=FALSE, echo=params$show_source_code}
 
 # Coding convention
 # To make scripts readable and consistent, we adhere to the packages and 
 # programming style of the tidyverse (www.tidyverse.org)
 
 # attach packages to R's search path
-library(rlang)     # tidyverse versions of base/core functions
-library(dplyr)     # grammar of data manipulation
-library(purrr)     # functional programming tools
-library(tidyr)     # tidy data
-library(ggplot2)   # grammar of graphics
-library(fs)        # file system
-library(knitr)     # dynamic report generation
-library(litteR)    # litter analysis
-library(readr)     # writing CSV-files
+suppressPackageStartupMessages({
+  library(rlang)     # tidyverse versions of base/core functions
+  library(dplyr)     # grammar of data manipulation
+  library(purrr)     # functional programming tools
+  library(tidyr)     # tidy data
+  library(ggplot2)   # grammar of graphics
+  library(fs)        # file system
+  library(knitr)     # dynamic report generation
+  library(litteR)    # litter analysis
+  library(readr)     # writing CSV-files
+  library(stringr)   # common string operations
+})
 ```
 
 
@@ -220,19 +207,16 @@ ANALYST_NAME <- params %>%
 # files
 INPUT_FILE_NAME <- params %>%
   chuck("file_input")
+GROUPS_FILE_NAME <- params %>%
+  chuck("file_groups")
 STATS_FILE_NAME <- params %>%
   chuck("file_stats")
 META_FILE_NAME <- STATS_FILE_NAME %>%
   str_replace("stats", "stats-meta")
-GROUPS_FILE_NAME <- INPUT_FILE_NAME %>%
-  path_dir %>%
-  path("litter-groups.csv")
 
 # tasks to perform
 MODULE_STATS <- params %>% 
   pluck("module_stats", .default = FALSE)
-MODULE_ASSESSMENT <- params %>% 
-  pluck("module_assessment", .default = FALSE)
 MODULE_TREND <- params %>% 
   pluck("module_trend", .default = FALSE)
 MODULE_BASELINE <- params %>% 
@@ -249,27 +233,10 @@ PERCENTAGE_TOTAL_ABUNDANCE <- params %>%
   pluck("percentage_total_abundance", .default = 80)
 
 # litter types to analyse
-TYPE_CODE <- params %>% 
-  chuck("litter_type") %>%
-  map_chr(str_to_upper)
-
-# Assessment statistic: mean or median
-ASSESSMENT_STATISTIC <- params %>%
-  chuck("assessment_statistic") %>%
-  str_to_lower
-
-# Threshold group or type
-THRESHOLD_TYPE <- params %>% 
-  chuck("threshold_type") %>%
-  str_to_upper
-if (!str_detect(THRESHOLD_TYPE, "\\[.+\\]")) {
-THRESHOLD_TYPE <- THRESHOLD_TYPE %>%
-  str_c("[", ., "]")
-}
-
-# Threshold value: natural number
-THRESHOLD_VALUE <- params %>% 
-  chuck("threshold_value")
+TYPE_CODES <- params %>% 
+  chuck("litter_types") %>%
+  map_chr(str_to_upper) %>%
+  unique
 
 # significance level
 ALPHA <- params %>%
@@ -291,12 +258,7 @@ MIN_SURVEYS <- params %>%
 
 ```{r}
 # read and validate group file
-if (file_exists(GROUPS_FILE_NAME)) {
-  d_grp <- read_litter_groups(GROUPS_FILE_NAME)  
-} else {
-  d_grp <- read_litter_groups()  
-}
-d_grp <- d_grp %>%
+d_grp <- read_litter_groups(GROUPS_FILE_NAME)  %>%
   mutate(group_name = str_c("[", group_name, "]"))
 ```
 
@@ -307,8 +269,6 @@ This tool performs the following types of data analysis on litter data, or any o
 
 This report can best be viewed with the latest versions of web browsers like Google Chrome, Mozilla Firefox, Chromium, or Safari. Its contents does not render well in some versions of Microsoft's Internet Explorer.
 
-This scripts expects a period as decimal separator and _not_ a comma. In MS-Windows 7, this can be accomplished by means of the 'Region and Language' menu (_e.g._, by using the English (UK) setting). These settings are particularly important when using MS-Excel for data preparation.
-
 
 
 ### Settings
@@ -318,15 +278,14 @@ This scripts expects a period as decimal separator and _not_ a comma. In MS-Wind
     - project path: `r sQuote(path_dir(INPUT_FILE_NAME))`
     - input file: `r sQuote(path_file(INPUT_FILE_NAME))`
     - input file signature: `r sQuote(get_signature(path(INPUT_FILE_NAME)))`
-    - group file: `r if (file_exists(GROUPS_FILE_NAME)) {sQuote(path_file(GROUPS_FILE_NAME))} else {"default"}`
+    - group file: `r sQuote(path_file(GROUPS_FILE_NAME))`
 - period: from `r DATE_FROM` to `r DATE_TO`
 - modules:
     - descriptive statistics: `r str_to_lower(MODULE_STATS)`
-    - threshold assessment: `r str_to_lower(MODULE_ASSESSMENT)`
     - trend analysis: `r str_to_lower(MODULE_TREND)`
     - baseline analysis: `r str_to_lower(MODULE_BASELINE)`
     - power analysis: `r str_to_lower(MODULE_POWER)`
-- litter type(s): `r TYPE_CODE`
+- litter type(s): `r TYPE_CODES`
 - exploratory data analysis
     - percentage of total abundance to analyse: `r PERCENTAGE_TOTAL_ABUNDANCE`%
 - power analysis
@@ -334,10 +293,6 @@ This scripts expects a period as decimal separator and _not_ a comma. In MS-Wind
     - number of Monte Carlo simulations: `r N_SIM`
     - minimum surveys to sample from: `r MIN_SURVEYS`
     - resolution of the effect size: `r RESOLUTION_EFFECT_SIZE`%
-- threshold value assessment
-    - assessment statistic: `r ASSESSMENT_STATISTIC`
-    - threshold group/type: `r THRESHOLD_TYPE`
-    - threshold value: `r THRESHOLD_VALUE`
 - report
     - image quality: `r sQuote(IMAGE_QUALITY)`
 
@@ -348,7 +303,10 @@ This scripts expects a period as decimal separator and _not_ a comma. In MS-Wind
 
 ```{r various checks, echo=FALSE, results='hide'}
 
-(INPUT_FILE_NAME == "") && stop("Litter file not specified", call. = FALSE)
+(INPUT_FILE_NAME == "") && stop(
+  "Litter file not specified",
+  call. = FALSE
+)
 
 !file_exists(INPUT_FILE_NAME) && stop(
     sprintf("Litter file %s not found", sQuote(INPUT_FILE_NAME)),
@@ -360,8 +318,6 @@ This scripts expects a period as decimal separator and _not_ a comma. In MS-Wind
         sprintf(DATE_FROM, DATE_TO),
     call. = FALSE
 )
-
-!(ASSESSMENT_STATISTIC %in% c("mean", "median")) && stop("The assessment statistic in the settings file should be either mean or median", call. = FALSE)
 
 ```
 
@@ -428,6 +384,106 @@ d_top <- d_top %>%
     arrange(region_name, country_code, location_code, location_name, ranking)
 ```
 
+
+
+```{r results='hide'}
+
+# get user-specified codes in settings file
+specified_codes <- TYPE_CODES %>% 
+    get_type_code %>%
+    discard(are_na)
+
+# get user-specified codes in settings file
+specified_groups <- TYPE_CODES %>% 
+    get_group_code %>%
+    discard(are_na)
+
+# get available codes in data file
+available_codes_data_file <- d_all %>%
+    pull("type_name") %>%
+    get_type_code %>%
+    unique
+
+# get available groups in group file
+available_codes_group_file <- d_grp %>%
+    pull("type_name") %>%
+    get_type_code %>%
+    unique
+
+# get available groups in group file
+available_groups_group_file <- d_grp %>%
+    pull("group_name") %>%
+    unique
+
+# check if all type codes as specified in settings.yaml also occur in the data file
+all(specified_codes %in% available_codes_data_file) || stop(sprintf(str_c(
+    "The following type code(s) are specified as %s in file %s ",
+    "but missing in input file %s:\n%s"),
+    "litter_types" %>%
+      sQuote %>%
+      enumerate,
+    "settings.yaml" %>%
+      sQuote,
+    INPUT_FILE_NAME %>%
+      path_file %>%
+      sQuote,
+    specified_codes %>%
+      setdiff(available_codes_data_file) %>%
+      enumerate,
+    call. = FALSE
+))
+
+# check if all group codes as specified in settings.yaml also occur in the group file
+all(specified_groups %in% available_groups_group_file) || stop(sprintf(str_c(
+    "The following groups are specified in file %s ",
+    "but missing in group file %s:\n%s"),
+    "settings.yaml" %>%
+      sQuote,
+    GROUPS_FILE_NAME %>%
+      path_file %>%
+      sQuote,
+    specified_groups %>%
+      setdiff(available_groups_group_file) %>%
+      enumerate,
+    call. = FALSE
+))
+
+# check if all type codes in data file are also in group file
+all(available_codes_data_file %in% available_codes_group_file) || stop(sprintf(str_c(
+    "The following types in data file %s are missing in group file %s:\n%s\n",
+    "Please add these types to the group file and indicate the groups they belong to."),
+    INPUT_FILE_NAME %>%
+      path_file %>%
+      sQuote,
+    GROUPS_FILE_NAME %>%
+      path_file %>%
+      sQuote,
+    available_codes_data_file %>%
+      setdiff(available_codes_group_file) %>%
+      enumerate,
+    call. = FALSE
+))
+
+# check if all type codes in data file are also in group file
+if (!all(available_codes_group_file %in% available_codes_data_file)) {
+  warning(sprintf(
+    "The following types in group file %s are missing in data file %s:\n%s",
+    GROUPS_FILE_NAME %>%
+      path_file %>%
+      sQuote,
+    INPUT_FILE_NAME %>%
+      path_file %>%
+      sQuote,
+    available_codes_group_file %>%
+      setdiff(available_codes_data_file) %>%
+      enumerate,
+    call. = FALSE
+  )) 
+}
+
+```
+
+
 ```{r}
 # add litter groups to litter types
 d_all <- d_grp %>%
@@ -440,6 +496,7 @@ d_all <- d_grp %>%
       group_by(region_name, country_code, location_code, location_name, date) %>%
       summarise(abundance = sum(abundance)) %>%
       ungroup %>%
+      filter(!are_na(abundance)) %>%
       mutate(type_name = x)
   }) %>%
   bind_rows(d_all)
@@ -458,30 +515,13 @@ d_all <- d_all %>%
       type_code = get_type_code(type_name),
       type_code = if_else(are_na(type_code), get_group_code(type_name), type_code))
     
-# check if specified litter types/groupes exist
-available_codes <- d_all %>%
-    pull("type_code") %>%
-    unique
-
 ```
 
-```{r results='hide'}
-
-unknown_codes <- TYPE_CODE %>%
-    setdiff(available_codes)
-n_unknown_codes <- length(unknown_codes)
-(n_unknown_codes != 0L) && stop(
-    "Specified litter type(s) and/or group(s) not found:\n",
-        enumerate(sQuote(unknown_codes)),
-    call. = FALSE
-)
-
-```
 
 ```{r}
 # Select type(s) of interest
 d_ltr <- d_all %>%
-    filter(type_code %in% TYPE_CODE)
+    filter(type_code %in% TYPE_CODES)
 ```
 
 ```{r}
@@ -540,9 +580,9 @@ d_stats <- d_stats %>%
 
 # store stats in a CSV-file
 d_stats %>%
-    rename(slope = b1, p_value_slope = p_value) %>%
+    rename(intercept = b0, slope = b1, p_value_slope = p_value) %>%
     mutate(slope = slope * 365.25) %>%
-    select(-perc_abundance, -topx, -ranking, -b0) %>%
+    select(-perc_abundance, -topx, -ranking) %>%
     mutate_if(is_double, function(x){if_else(is.nan(x), NA_real_, x)}) %>%
     mutate_if(is_double, signif, digits = 3) %>%
     write_csv(STATS_FILE_NAME, na = "")
@@ -564,11 +604,6 @@ path_package("litteR", "extdata", "litter-stats-meta.csv") %>%
 <br/>
 <br/>
 ```{r, child=system.file("app", "litter-stats.Rmd", package = "litteR"), eval=MODULE_STATS}
-```
-
-<br/>
-<br/>
-```{r, child=system.file("app", "litter-assessment.Rmd", package = "litteR"), eval=MODULE_ASSESSMENT}
 ```
 
 <br/>

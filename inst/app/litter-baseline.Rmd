@@ -42,7 +42,7 @@ d <- stats %>%
                             summarise(
                                 n_days = list(date %>% roll(n_surveys, n_days)),
                                 value = list(abundance %>% roll(n_surveys, get(stat)))) %>%
-                            unnest %>%
+                            unnest(c(n_days, value)) %>%
                             mutate(type_name = x$type_name[1], region_name = x$region_name[1], 
                                    country_code = x$country_code[1], location_name = x$location_name[1], 
                                    ranking = x$ranking[1], n_surveys = n_surveys, stat = stat)

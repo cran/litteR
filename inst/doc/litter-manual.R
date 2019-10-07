@@ -16,6 +16,23 @@ knitr::include_graphics("./fig/r-console.png")
 ## ---- out.width=650, fig.cap="File open dialogue.", fig.align="center"----
 knitr::include_graphics("./fig/file-open-dialogue.png")
 
+## ---- message=FALSE, comment=NA------------------------------------------
+path_package("litteR", "extdata", "beach-litter-nl-2012-2017-wide.csv") %>%
+    read_csv %>%
+    select(1:8) %>%
+    slice(1:10)
+
+## ---- message=FALSE, comment=NA------------------------------------------
+path_package("litteR", "extdata", "beach-litter-nl-2012-2017-long.csv") %>%
+    read_csv %>%
+    slice(1:10)
+
+## ---- message=FALSE, comment=NA------------------------------------------
+path_package("litteR", "extdata", "beach-litter-nl-2012-2017-ospar.csv") %>%
+    read_csv %>%
+    select(1:10) %>%
+    slice(1:10)
+
 ## ---- out.width="500px", fig.cap="Settings file in YAML-format.", fig.align='center', comment=NA----
 path_package("litteR", "extdata", "settings.yaml") %>%
     read_lines %>%
@@ -33,23 +50,6 @@ path_package("litteR", "extdata", "settings.yaml") %>%
     kable_styling(full_width = FALSE) %>%
     column_spec(2, width = "15em") %>%
     column_spec(3, width = "15em")
-
-## ---- message=FALSE, comment=NA------------------------------------------
-path_package("litteR", "extdata", "beach-litter-nl-2012-2017-ospar.csv") %>%
-    read_csv %>%
-    select(1:10) %>%
-    slice(1:10)
-
-## ---- message=FALSE, comment=NA------------------------------------------
-path_package("litteR", "extdata", "beach-litter-nl-2012-2017-wide.csv") %>%
-    read_csv %>%
-    select(1:8) %>%
-    slice(1:10)
-
-## ---- message=FALSE, comment=NA------------------------------------------
-path_package("litteR", "extdata", "beach-litter-nl-2012-2017-long.csv") %>%
-    read_csv %>%
-    slice(1:10)
 
 ## ---- out.width=650, fig.cap="First 10 records of the litter-groups.csv file.", fig.align="center"----
 knitr::include_graphics("./fig/litter-groups.png")

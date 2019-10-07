@@ -4,9 +4,7 @@
 #' A Tcl/Tk-dialogue will be started if one or more arguments 
 #' are missing.
 #' 
-#' @param file_settings file containing settings
-#' @param file_input file containing litter data
-#' @param dir_output directory to store output
+#' @param file file containing litter data (see vignette for details)
 #' 
 #' @return An HTML-document in which all the litter analysis results 
 #' (tables, figures, explanotory text) are reported.
@@ -21,10 +19,10 @@
 #' @importFrom fs path path_norm path_package file_temp dir_copy path_dir
 #' 
 #' @export
-litter <- function(file_settings = NULL, file_input = NULL, dir_output = NULL) {
+litter <- function(file = NULL) {
 
     # check if Tcl/Tk is available
-    if (is_null(file_input) | is_null(file_settings) | is_null(dir_output)) {
+    if (is_null(file)) {
         if (!capabilities("tcltk")) {
             stop(
                 "The 'tcltk'-package is not supported on this machine.\n",
@@ -32,54 +30,39 @@ litter <- function(file_settings = NULL, file_input = NULL, dir_output = NULL) {
                 call. = FALSE
             )
         }
-    }
-
-    if (is_null(file_settings)) {
-        file_settings <- tk_choose.files(
-            default = "",
-            caption = "Select settings file",
-            multi = FALSE,
-            filters = matrix(data = c("settings file", ".yaml"), nrow = 1)
-        )
-        if (length(file_settings) == 0L) {
-            message("Selection of the settings file has been cancelled.")
-            return(invisible(NULL))
-        }
-    }
-    pars <- file_settings %>%
-        read_lines %>%
-        yaml.load
-
-    if (is_null(file_input)) {
-        file_input <- tk_choose.files(
+        message("Note: A file dialogue should appear right now.\n",
+                "If not, it is likely to be hidden behind other programs.")
+        file <- tk_choose.files(
             default = "",
             caption = "Select input file",
             multi = FALSE,
             filters = matrix(data = c("input file", ".csv"), nrow = 1)
         )
-        if (length(file_input) == 0L) {
+        if (length(file) == 0L) {
             message("Selection of the input file has been cancelled.")
             return(invisible(NULL))
         }
     }
-    pars <- c(pars, file_input = path_norm(file_input))
-    if (is_null(dir_output)) {
-        dir_output <- tk_choose.dir(
-            default = path_dir(file_settings),
-            caption = "Select output directory"
-        )
-        if (length(dir_output) == 0L) {
-            message("Output directory not found.")
-            return(invisible(NULL))
-        }
-        if (is_na(dir_output)) {
-            message("Selection of the output directory has been cancelled.")
-            return(invisible(NULL))
-        }
-    }
 
-    pars$litter_type <- pars %>%
-        chuck("litter_type") %>%
+    # extract work directory    
+    dir_output <- file %>%
+        path_dir
+
+    # read settings
+    pars <- dir_output %>%
+        path("settings.yaml") %>%
+        read_lines %>%
+        yaml.load %>%
+        c(file_input = path_norm(file))
+    
+    # add path to groups file
+    pars$file_groups <- pars %>%
+        chuck("file_groups") %>%
+        path(dir_output, .)
+
+    # handle specified litter/group type(s)
+    pars$litter_types <- pars %>%
+        chuck("litter_types") %>%
         str_to_upper %>%
         map_chr(function(x) {
             if_else(
@@ -90,8 +73,7 @@ litter <- function(file_settings = NULL, file_input = NULL, dir_output = NULL) {
         })
 
     # concatenate first character of selected modules
-    selected_modules <- c("stats", "assessment", "trend",
-                          "baseline", "power") %>%
+    selected_modules <- c("stats", "trend", "baseline", "power") %>%
         map_chr(function(x) {
             ret <- ""
             if (pars %>% chuck(str_c("module_", x))) {
@@ -103,17 +85,19 @@ litter <- function(file_settings = NULL, file_input = NULL, dir_output = NULL) {
         }) %>%
         str_c(collapse = "")
 
-    # construct output file names
+    # construct filename report
     file_report <- path(
         dir_output,
         "litter-report-%s-%s-%s.html" %>%
             sprintf(
                 pars %>%
-                    chuck("litter_type") %>%
+                    chuck("litter_types") %>%
                     str_c(collapse = ""),
                 selected_modules %>%
                     str_c(collapse = ""),
                 format(Sys.time(), "%Y%m%d-%H%M%S")))
+
+    # construct filename statistics
     pars$file_stats <- file_report %>%
         str_replace("report", "stats") %>%
         str_replace("html$", "csv")
@@ -124,6 +108,8 @@ litter <- function(file_settings = NULL, file_input = NULL, dir_output = NULL) {
         dir_copy(temp_dir)
     owd <- setwd(temp_dir)
     on.exit(setwd(owd))
+    message("litteR is currently processing your data. ",
+            "This may take several minutes...")
     render(
         input = "litter-main.Rmd",
         output_format = html_document(
@@ -132,7 +118,9 @@ litter <- function(file_settings = NULL, file_input = NULL, dir_output = NULL) {
             css = "litter.css"),
         output_file = file_report,
         params = pars,
-        quiet = FALSE)
+        quiet = TRUE)
+    message("Finished! All results have been written to:\n",
+            sQuote(dir_output))
 }
 
 
@@ -163,6 +151,8 @@ create_litter_project <- function(path = NULL) {
 
     # select project directory
     if (is_null(path)) {
+        message("Note: A file dialogue should appear right now.\n",
+                "If not, it is likely to be hidden behind other programs.")
         path <- tk_choose.dir(caption = "Select project directory")
         if (length(path) == 0L) {
             message("Project directory not found.")

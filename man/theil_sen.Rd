@@ -43,3 +43,6 @@ slope(ts)
 # get intercept
 intercept(ts)
 }
+\references{
+\url{https://en.wikipedia.org/wiki/Theil-Sen_estimator}
+}

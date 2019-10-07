@@ -77,7 +77,7 @@ as_internal_format <- function(x, ...) {
 
 #' @describeIn as_internal_format convert OSPAR data to internal representation.
 #'
-#' @importFrom dplyr "%>%" select arrange mutate
+#' @importFrom dplyr "%>%" select arrange mutate if_else
 #' @importFrom tidyr gather
 as_internal_format.ospar <- function(x, ...) {
     x %>%
@@ -89,7 +89,9 @@ as_internal_format.ospar <- function(x, ...) {
             location_name = "beach name",
             date = "survey date") %>%
         mutate(
-            date = date %>% as.Date("%d/%m/%Y"),
+            date = if_else(
+                is_date_format(date, "%d/%m/%Y"),
+                date %>% as.Date("%d/%m/%Y"), as.Date(date)),
             country_code = str_replace(refno, "[0-9]+", replacement = ""),
             location_code = refno) %>%
         select(region_name, country_code, country_name, location_code,
@@ -159,14 +161,27 @@ validate.ospar <- function(x, ...) {
     (n_missing_field_names  > 1L) && stop(
         "Columns ", sQuote(missing_field_names), " are missing", call. = FALSE)
 
-    # check date field
-    is_valid <- x %>%
+    # check date field, either OSPAR or ISO 8601
+    is_valid_dmy <- x %>%
         pull("survey date") %>%
         is_date_format("%d/%m/%Y")
+    is_valid_ymd <- x %>%
+        pull("survey date") %>%
+        is_date_format("%Y-%m-%d")
+    is_valid <- is_valid_dmy | is_valid_ymd
     any(!is_valid) && stop(
         "Invalid date format found in records:\n",
         toString(sequenize(which(!is_valid))),
-        "\nPlease adhere to OSPAR format (dd/mm/YYYY).", call. = FALSE)
+        "\nPlease adhere to either OSPAR format (dd/mm/YYYY) or ",
+        "ISO 8601 format (YYYY-mm-dd).", call. = FALSE)
+
+    # make sure date field is consistent
+    if (!(all(is_valid_dmy) || all(is_valid_ymd))) {
+        stop(
+            "Inconsistent date formats found.",
+            "\nPlease adhere to either OSPAR format (dd/mm/YYYY) or ",
+            "ISO 8601 format (YYYY-mm-dd), but not both.", call. = FALSE)
+    }
 
     # keep only litter data
     litter_counts <- names(x)[is_type_name(names(x))]
@@ -371,7 +386,8 @@ validate.wide <- function(x, ...) {
     any(!is_valid) && stop(
         "Invalid date format found in records:\n",
         toString(sequenize(which(!is_valid))),
-        "\nPlease adhere to OSPAR format (dd/mm/YYYY).", call. = FALSE)
+        "\nPlease adhere to ISO 8601 (YYYY-mm-dd).", call. = FALSE)
+
 
     # keep only litter data
     litter_counts <- names(x)[is_type_name(names(x))]
@@ -463,13 +479,13 @@ validate.wide <- function(x, ...) {
 #' @param file name of litter file
 #'
 #' @return \code{tibble} with litter data in long format
-#' @importFrom readr read_csv parse_number
+#' @importFrom readr read_csv parse_number count_fields tokenizer_csv
 #' @importFrom dplyr select select_if rename mutate arrange matches
 #' @importFrom tidyr gather
 #' @importFrom purrr set_names negate
 #' @importFrom stringr str_to_lower
 #' @importFrom rlang has_name
-#' @importFrom fs file_exists
+#' @importFrom fs file_exists path_file
 #' @export
 read_litter <- function(file) {
 
@@ -477,6 +493,20 @@ read_litter <- function(file) {
     (!file_exists(file)) && stop("file ", sQuote(file),
                                  " not found.", call. = FALSE)
 
+    # check if 'file' is a genuine CSV-file with sufficient columns
+    n <- file %>%
+        count_fields(tokenizer_csv(), n_max = 1L)
+    (n == 1L) && stop(
+        str_c(
+            "An incorrect column delimiter is probably used\nin file %s.\n",
+            "Please use a comma as column delimiter.\n",
+            "see the troubleshooting section in the tutorial.") %>%
+            sprintf(sQuote(path_file(file))),
+        call. = FALSE
+    )
+
+    
+    
     # read file
     d <- suppressMessages(read_csv(file, guess_max = 1000000))
 
@@ -486,7 +516,8 @@ read_litter <- function(file) {
     (signature == "unknown") && stop(
         "Can't figure out the signature of file ",
         sQuote(file),
-        "\nPlease check its column names.",
+        "\nPlease check its column names. ",
+        "See the package vignette for details.",
         call. = FALSE)
     class(d) <- c(str_to_lower(signature), class(d))
 
@@ -513,8 +544,9 @@ read_litter <- function(file) {
 #' @importFrom dplyr filter select
 #' @importFrom tidyr gather
 #' @export
-read_litter_groups <- function(file = path_package("litteR", "extdata",
-                                                   "litter-groups.csv")) {
+read_litter_groups <- function(file) {
+    (!file_exists(file)) && stop("Group file ", sQuote(file),
+                                 " not found.", call. = FALSE)
     d <- file %>%
         read_csv(col_types = cols(.default = col_character()))
     class(d) <- c("litter_group", class(d))

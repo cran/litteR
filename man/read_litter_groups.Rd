@@ -4,8 +4,7 @@
 \alias{read_litter_groups}
 \title{Read Litter Groups}
 \usage{
-read_litter_groups(file = path_package("litteR", "extdata",
-  "litter-groups.csv"))
+read_litter_groups(file)
 }
 \arguments{
 \item{file}{name of litter group file}

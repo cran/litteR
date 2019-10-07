@@ -9,9 +9,10 @@ to,final date of the survey,date
 mean,mean abundance ,count
 median,median abundance,count
 cv,coefficient of variation of the abundance,1
-rmad,"ratio of MAD to median",1
+rmad,ratio of MAD to median,1
 n,number of surveys used to estimate these statistics,1
-slope,"slope of the Theil-Sen trend (annual increase in abundance)",1/a
+intercept,"intercept of the Theil-Sen trend line, i.e.,  intercept + slope * (year - 1970)",count
+slope,slope of the Theil-Sen trend line (annual increase in abundance),1/a
 p_value_slope,p-value of the Theil-Sen slope,1
 min,minimum abundance,count
 p01,1st percentile of the abundance,count

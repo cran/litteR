@@ -5,7 +5,6 @@ analyst_name: "RWS"
 
 # Which modules to run (false or true)
 module_stats: true
-module_assessment: true
 module_trend: true
 module_baseline: true
 module_power: true
@@ -17,21 +16,12 @@ max_date: 2017-12-31
 # Percentage of total abundance to analyse (0 < percentage_total_abundance <= 100)
 percentage_total_abundance: 80
 
-# Litter type to analyse 
-# (e.g., OSPAR codes in square brackets
-# and [TA] for total abundance)
-litter_type: [[TA], [49]]
+# name of group file (see package vignette for more details)
+file_groups: ospar-groups.csv
 
-# Threshold value analysis
-
-# Assessment type: mean or median
-assessment_statistic: median
-
-# Threshold group or type
-threshold_type: [TA]
-
-# Threshold value: natural number
-threshold_value: 15
+# Litter type(s) to analyse 
+# (e.g., OSPAR codes in square brackets and [TA] for total abundance)
+litter_types: [[TA], [49]]
 
 # Image quality: high or low
 image_quality: high

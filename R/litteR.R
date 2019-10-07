@@ -18,7 +18,6 @@
 #' in the European OSPAR region. Environmental Pollution 248:555-564 
 #' <doi:10.1016/j.envpol.2019.02.030>
 #' 
+#' @import ggplot2
 #' @importFrom fs file_exists path_package
 "_PACKAGE"
-
-

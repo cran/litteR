@@ -7,12 +7,6 @@ output:
   rmarkdown::html_vignette:
     number_sections: true      
     toc: true
-  html_document:
-    number_sections: true      
-    toc: true
-  pdf_document:
-    number_sections: true      
-    toc: true
 vignette: >
   %\VignetteIndexEntry{Introduction to litteR}
   %\VignetteEncoding{UTF-8}
@@ -38,7 +32,6 @@ library(kableExtra)
 `litteR` is a modular tool for analyzing litter data (_e.g._,  beach litter). The current version (`r packageVersion("litteR")`) contains the following modules:
 
 - module stats: descriptive statistics;
-- module_assessment: threshold assessment;
 - module trend: non-parametric trend analysis of litter time-series;
 - module baseline: baseline analysis and
 - module power: power analysis.
@@ -57,14 +50,15 @@ For applications with `litteR` see Schulz _et al._ (2019).
 # User interface
 
 
-## Create a new project
+## Create a new project {#create_new_project}
 
 The easiest way to start working with `litteR` is to create an empty project directory. This directory can be filled with example and reference files by running:
 
 `create_litter_project("d:/work/litter-projects/beach-litter")`
 
+in the [RStudio](https://rstudio.com) console. For more information on how to obtain and use RStudio, consult its [website](https://rstudio.com).
 
-where its argument (the quoted part in parentheses) is an existing work directory on your computer. This can be any valid directory name with sufficient user privileges. Note for MS-Windows users: R requires forward slashes!
+The argument of function `create_litter_project` (_i.e._, the quoted part in parentheses) is an existing work directory on your computer. This can be any valid directory name with sufficient user privileges. Note for MS-Windows users: R requires forward slashes!
 
 It is also possible to run `create_litter_project()` without an argument. In that case, a simple graphical user interface pops up for interactive directory selection.
 
@@ -73,7 +67,7 @@ It is also possible to run `create_litter_project()` without an argument. In tha
 
 ## Perform litter analysis
 
-`litteR` can be started typing `litter()` in the RStudio console (see the figure below).
+`litteR` can be started typing `litter()` in the [RStudio](https://rstudio.com) console (see the figure below).
 
 
 ```{r, out.width=650, fig.cap="Functions to start a litteR session.", fig.align="center"}
@@ -81,88 +75,33 @@ knitr::include_graphics("./fig/r-console.png")
 ```
 
 
-After entering `litter()` a simple graphical user interface pops up for file selection. An example of a file selection dialogue, in this case for selecting the input file, is given below.
+After entering `litter()`, a simple graphical user interface pops up for file selection. An example of a file selection dialogue is given below.
 
 ```{r, out.width=650, fig.cap="File open dialogue.", fig.align="center"}
 knitr::include_graphics("./fig/file-open-dialogue.png")
 ```
 
 
-# Inputs
-
-The file dialogues of `litteR` ask the user to specify:
-
-- a settings file: where all settings / parameters are specified;
-- a litter file: containing the litter data. These data can be beach litter data, or any other type of litter data;
-- and an output directory, _.i.e._, the directory where the resulting HTML-report should be stored.
-
-These files are briefly described below.
+# Input
 
 
+## Litter file
 
-## Settings {#settings}
+The current version of `litteR` supports three data formats:
 
-The settings file contains all settings needed to run `litteR`. The settings file is in the [YAML](https://en.wikipedia.org/wiki/YAML)-format. This is a human-readable data language that is commonly used for settings files. An example of the contents of a settings file is given in the figure below.
-```{r, out.width="500px", fig.cap="Settings file in YAML-format.", fig.align='center', comment=NA}
-path_package("litteR", "extdata", "settings.yaml") %>%
-    read_lines %>%
-    cat(sep = "\n")
-```
-
-The YAML-file contains the following entries:
-
-```{r message=FALSE}
-"./tbl/settings.csv" %>%
-    read_csv(
-        col_types = cols(
-          entry = col_character(),
-          description = col_character(),
-          value = col_character()
-        )) %>%
-    kable %>%
-    kable_styling(full_width = FALSE) %>%
-    column_spec(2, width = "15em") %>%
-    column_spec(3, width = "15em")
-```
-
-
-## Litter types
-
-The current version of `litteR` reads litter data in three formats:
-
-- the [OSPAR-format](https://odims.ospar.org) (wide data format), used for [beach litter](https://odims.ospar.org);
-- a simpler [wide format](https://en.wikipedia.org/wiki/Wide_and_narrow_data)
-- and a [long format](https://en.wikipedia.org/wiki/Wide_and_narrow_data)
+- [wide format](https://en.wikipedia.org/wiki/Wide_and_narrow_data), this is `litteR`'s native and recommended format;
+- [long format](https://en.wikipedia.org/wiki/Wide_and_narrow_data);
+- [OSPAR-format](https://odims.ospar.org) (wide data format);
 
 These formats will be briefly described below.
 
-### OSPAR format
-
-The OSPAR format is a wide format, meaning that all litter types are stored in columns and each row represents a survey. 
-OSPAR beach litter data can be downloaded from the [OSPAR website](https://odims.ospar.org).
-
-The image below gives an example of the first 10 columns and records of litter data in the OSPAR-format. 
-
-```{r, message=FALSE, comment=NA}
-path_package("litteR", "extdata", "beach-litter-nl-2012-2017-ospar.csv") %>%
-    read_csv %>%
-    select(1:10) %>%
-    slice(1:10)
-```
-
-
-The columns are separated by comma's (CSV-file). Five columns are compulsory, _i.e._, "refno", "beach name", "country", "region", and "survey date". Note that the date format does not comply with [ISO 6801](https://en.wikipedia.org/wiki/ISO_8601) standard date format. Instead, OSPAR uses dd/mm/YYYY (see the image above). The other columns contain litter types. The names of these columns have the following format
-
-litter group: litter type [litter code]
-
-for instance, 'Plastic: Bags [2]'.
-
-Optionally, other columns may be added as metadata. However, these columns will be ignored by `litteR`.
 
 
 ### Wide format
 
-The wide format is comparable to the OSPAR format, but less restrictive. The following columns are required: "region_name","country_code","country_name","location_name",and "date". The columns are separated by comma's (CSV-file)
+[settings-file (*.yaml)](#settings)
+
+The wide format is `litteR`'s native and recommended format. It is comparable to the [OSPAR format](#ospar_format) given below, but less restrictive. The following columns are required: "region_name","country_code","country_name","location_name",and "date". The columns are separated by comma's (CSV-file)
 
 The image below gives an example of the wide format. 
 
@@ -176,9 +115,9 @@ path_package("litteR", "extdata", "beach-litter-nl-2012-2017-wide.csv") %>%
 
 It's less restrictive than the OSPAR-format in the sense that litter types are not restricted to the format 
 
-litter group : litter type [litter code]
+`litter group : litter type [litter code]`
 
-The only requirement is that a [litter code] should be available. Indeed, all litter specifications given below are valid:
+The only requirement is that a [litter code] should be available. In fact, all litter specifications given below are valid:
 
 - "Plastic: spoon [56]"
 - "Spoon [G56]"
@@ -207,35 +146,92 @@ path_package("litteR", "extdata", "beach-litter-nl-2012-2017-long.csv") %>%
     slice(1:10)
 ```
 
+
+### OSPAR format {#ospar_format}
+
+The OSPAR format is a wide format, meaning that all litter types are stored in columns and each row represents a survey. 
+OSPAR beach litter data can be downloaded from the [OSPAR website](https://odims.ospar.org).
+
+The image below gives an example of the first 10 columns and records of litter data in the OSPAR-format. 
+
+```{r, message=FALSE, comment=NA}
+path_package("litteR", "extdata", "beach-litter-nl-2012-2017-ospar.csv") %>%
+    read_csv %>%
+    select(1:10) %>%
+    slice(1:10)
+```
+
+
+The columns are separated by comma's (CSV-file). Five columns are compulsory, _i.e._, "refno", "beach name", "country", "region", and "survey date". Note that the OSPAR date format currently does not comply with [ISO 6801](https://en.wikipedia.org/wiki/ISO_8601) standard date format. Instead, OSPAR uses dd/mm/YYYY (see the image above). However, for convenience and consistency, `litteR` also allows for dates in the ISO 6801 format. The other columns contain litter types. The names of these columns have the following format
+
+`litter group: litter type [litter code]`
+
+for instance, 'Plastic: Bags [2]'.
+
+Optionally, other columns may be added as metadata. However, these columns will be ignored by `litteR`.
+
+
 ### Quality Control
 
 All input files are validated by `litteR`. The following validation rules apply:
 
 1. all required columns (see above) should be available;
-1. the date format should be valid, _i.e._ YYYY-mm-dd (ISO 8601) for the Wide and Long formats or dd/mm/YYYY for the OSPAR format;
-1. litter names should adhere to the specifications given above;
+1. the date format should be valid, _i.e._ YYYY-mm-dd (ISO 8601) for the Wide and Long formats or dd/mm/YYYY or YYYY-mm-dd (ISO 8601) for the OSPAR format;
+1. litter type names should adhere to the specifications given above;
 1. abundances need to be [natural numbers](https://en.wikipedia.org/wiki/Natural_number) (ISO 80000-2);
 1. all records should be unique, duplicated records will be removed with a warning;
-1. all cells should be filled.
+1. all cells should be filled with the appropriate data type (numbers, text or dates).
 
 
 
-## Litter groups
 
-The work directory should also contain a file called 'litter-groups.csv'. This file assigns each litter type (`type_name`, in rows) to one or more litter groups (columns). This file is automatically generated when using the `create_litter_project` function, described earlier in this tutorial. The first 11 rows of this file are given below.
+
+
+
+## Settings file {#settings}
+
+The settings file contains all settings needed to run `litteR`. The settings file is in the [YAML](https://en.wikipedia.org/wiki/YAML)-format. This is a human-readable data language that is commonly used for settings files. An example of the contents of a settings file is given in the figure below.
+```{r, out.width="500px", fig.cap="Settings file in YAML-format.", fig.align='center', comment=NA}
+path_package("litteR", "extdata", "settings.yaml") %>%
+    read_lines %>%
+    cat(sep = "\n")
+```
+
+The YAML-file contains the following entries:
+
+```{r message=FALSE}
+"./tbl/settings.csv" %>%
+    read_csv(
+        col_types = cols(
+          entry = col_character(),
+          description = col_character(),
+          value = col_character()
+        )) %>%
+    kable %>%
+    kable_styling(full_width = FALSE) %>%
+    column_spec(2, width = "15em") %>%
+    column_spec(3, width = "15em")
+```
+
+
+
+
+## Groups file
+
+The work directory should also contain a litter groups file. An example file, named '`ospar-groups.csv`' is automatically generated when using the `create_litter_project`-function, described [earlier](#create_new_project) in this tutorial. A groups file assigns each litter type (`type_name`, in rows) to one or more litter groups (columns) by placing an `x` in a cell. The first 11 rows of `ospar-groups.csv` are given in the table below.
 
 ```{r, out.width=650, fig.cap="First 10 records of the litter-groups.csv file.", fig.align="center"}
 knitr::include_graphics("./fig/litter-groups.png")
 ```
 
 
-Both individual type codes and litter groups (column names) can be specified as `litter_type` in the [settings-file (*.yaml)](#settings). For instance:
+Both individual type codes and litter groups (column names) can be specified as `litter_types` in the [settings-file (*.yaml)](#settings). For instance:
 
-`litter_type: [[TA], [49], [SUP], [FISH]]`
+`litter_types: [[TA], [49], [SUP], [FISH]]`
 
 
-The user may optionally add new groups to or remove existing groups from this table. Only the `type_name` and `TA`-columns (total abundance) are compulsory.
-
+The user may use '`ospar-groups.csv`' as a template for his own group file. `litteR` will use the group file that has been specified in the [settings-file (*.yaml)](#settings), _e.g._, `file_groups: ospar-groups.csv`.
+Note that the `litteR`-user can create and use tailor-made groups files, which match the input data used. 
 
 # Output
 
@@ -248,7 +244,6 @@ The filename of each report starts with 'litter-report', followed by
 - the litter types and/or groups that have been selected in the settings file
 - a string of codes specifying the the selected modules
     - S: descriptive statistics
-    - A: Threshold analysis
     - T: Trend analysis
     - B: Baseline analysis
     - P: Power analysis
@@ -281,16 +276,9 @@ For each selected litter type and period, this section gives several descriptive
 - number of surveys (N).
 
 
-These statistics will be estimated for the top x% types, _i.e._ types with the greatest abundances making up x% of the total abundance for each location.
+These statistics will be estimated for the top x% types, _i.e._ types with the greatest abundances making up x% of the total abundance for each location. For example in OSPAR data analysis, the top 80% is used by default.
 
 
-
-### Threshold analysis
-
-For each location, it is tested if the distribution of abundances is significantly lower than the supplied threshold value. Testing is performed by means of the one-tailed Wilcoxon signed rank test. In addition, the percentage of locations, with significantly low litter abundances at several spatial scales is given.
-
-
-  
 
 ### Trend analysis
 
@@ -377,9 +365,9 @@ knitr::include_graphics("./fig/power.png")
 
 
 
-## Statistical summary
+## Statistical summary file
 
-In addition to a report, a CSV-file with summary statistics will be produced for each location. This file is accompanied by a file with metadata. This file is given below:
+In addition to a report, a CSV-file with summary statistics will be produced for each location. This file is accompanied by a file with metadata. The metadata are given below:
 
 
 ```{r, message=FALSE, comment=NA}
@@ -387,6 +375,14 @@ path_package("litteR", "extdata", "litter-stats-meta.csv") %>%
     read_csv %>% 
     kable(align = "lll")
 ```
+
+
+
+# Troubleshooting
+
+- Dates should comply with ISO 8601, _i.e._ YYYY-mm-dd (_e.g._, 2019-09-05). If you prepare your input data with MS-Excel, make sure that the dates in the exported CSV-file also comply with this format. You can check this with a text editor (like Notepad on MS-Windows).
+- After typing `litter()` in the RStudio console, a file dialogue should appear. If that is not the case, the file dialogue is probably covered by RStudio (see the task manager or use ALT-TAB on MS-Windows to navigate to the hidden file dialogue).
+- `litteR` expects a period (.) as decimal separator (_e.g._, 8.5) and _not_ a comma (_e.g._, _not_ 8,5). In MS-Windows 7, this can be accomplished by means of the 'Region and Language' menu (_e.g._, by using the English (UK) setting). These settings are particularly important when using MS-Excel for data preparation. In cases `litteR` reports errors, you should check the file format exported by MS-Excel in a text editor (_e.g._, Notepad).
 
 
 # References

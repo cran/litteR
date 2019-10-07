@@ -4,9 +4,11 @@ function(libname, pkgname) {
     packageStartupMessage(
         "Copyright 2018-",
         format(Sys.Date(), "%Y"),
-        " by Rijkswaterstaat, the Netherlands (RWS)."
+        " by Rijkswaterstaat (RWS), the Netherlands."
     )
     packageStartupMessage("Type citation(\"litteR\") ",
                           "on how to cite litteR in publications.")
-    packageStartupMessage("For the tutorial, type: vignette(\"litter-manual\")")
+    packageStartupMessage("Use function 'create_litter_project()' to create a new project.")
+    packageStartupMessage("For the tutorial, type: vignette(\"litter-manual\").")
+    packageStartupMessage("In case of errors, please consult the troubleshooting section in this tutorial.")
 }

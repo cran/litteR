@@ -168,8 +168,8 @@ p_value.mann_kendall <- function(x, ...) {
 #' @param x time vector (\code{numeric}, or \code{Date}).
 #' @param y numeric value.
 #' @param \dots further arguments passed to or from other methods.
-#' @references \href{https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator}{Theil-Sen}
-#'
+#' 
+#' @references \url{https://en.wikipedia.org/wiki/Theil-Sen_estimator}
 #' @return object of class \code{Theil_Sen}.
 #' @importFrom stats median
 #' 
