@@ -1,5 +1,5 @@
 ---
-title: "litteR User's Manual"
+title: "litteR User Manual"
 author: 'Dennis Walvoort <font size="1">Wageningen Environmental Research, The Netherlands</font><br>Willem van Loon <font size="1"> Rijkswaterstaat, The Netherlands</font>'
 date: "`r Sys.Date()`"
 fontsize: 11pt
@@ -8,9 +8,9 @@ output:
     number_sections: true      
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Introduction to litteR}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{litteR User Manual}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
@@ -56,7 +56,7 @@ The easiest way to start working with `litteR` is to create an empty project dir
 
 `create_litter_project("d:/work/litter-projects/beach-litter")`
 
-in the [RStudio](https://rstudio.com) console. For more information on how to obtain and use RStudio, consult its [website](https://rstudio.com).
+in the [RStudio](https://rstudio.com) console. For more information on how to obtain and use RStudio, consult its [website](https://rstudio.com) or read our [installation guide](litter-installation.html).
 
 The argument of function `create_litter_project` (_i.e._, the quoted part in parentheses) is an existing work directory on your computer. This can be any valid directory name with sufficient user privileges. Note for MS-Windows users: R requires forward slashes!
 

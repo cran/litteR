@@ -1,3 +1,13 @@
+# litteR 0.6.4 (2019-10-16)
+
+* minor textual corrections to please CRAN
+
+
+# litteR 0.6.3 (2019-10-15)
+
+* Added installation guide (vignette)
+
+
 # litteR 0.6.2 (2019-10-03)
 
 * Added 'Faeces: In_bags [121]' (SUP) to ospar-groups.csv
