@@ -1,6 +1,6 @@
-8fa65c6695a17705949f635bfb08152b *DESCRIPTION
+8c9c651120c5df3bb2edd851fa1d5114 *DESCRIPTION
 a1cadcf85d08c58bf6a994e10fe3c6a4 *NAMESPACE
-92301992153a8e6dcb8204a4edb25868 *NEWS.md
+d077b00a2285c54a129ab96e3890dd2b *NEWS.md
 f1558c775525b6bebb5def613223c75c *R/gui.R
 be5e860a441669e077709247c2352d7c *R/io.R
 0c397c9a45c6dfa7522ad32ed10b676b *R/litteR.R
@@ -8,7 +8,7 @@ be5e860a441669e077709247c2352d7c *R/io.R
 06df5acb9cdaad7461cc2e0ff6191e8a *R/stats.R
 25c2fdb0a40dee18a06192c3fe9b6cbf *R/utils.R
 bde277e4895bd738e8d566b9a94b381e *README.md
-8313112d0ae95478dc45d96e3f39dc7a *build/partial.rdb
+f796846726e86b5f25e30b808764a5f7 *build/partial.rdb
 e4d77901908fce4450e1b6f496e31fd2 *build/vignette.rds
 60904c80ffd3d18cc34c12b314e57daa *inst/CITATION
 9685174572162a54af91351b4a641d6e *inst/app/litter-baseline.Rmd
@@ -19,10 +19,10 @@ ec2e1595c2d5640b9f4b1c02ee30942b *inst/app/litter-stats.Rmd
 e4f34a0eed666321f7d2eeede2cdf4ca *inst/app/litter.css
 57cc6609f9ac99623d6b895ac3075c7f *inst/doc/litter-installation.R
 78ff0360b73965d4d6bdaedaab906950 *inst/doc/litter-installation.Rmd
-95128a744877fd7571aecacac114816c *inst/doc/litter-installation.html
+55456d064ef1fd428cb7366176d6b4a7 *inst/doc/litter-installation.html
 4dad16bcd9f9724b26263434aef65a08 *inst/doc/litter-manual.R
-ac2d696c8a65d01b56fccb346cd2d2e5 *inst/doc/litter-manual.Rmd
-6a14281258b0bfbe5bde5d828904fbe0 *inst/doc/litter-manual.html
+2c751a99bd05b1420a0adf14712cbb7e *inst/doc/litter-manual.Rmd
+0cd7d609edf9c1ed419b3bbbd86f661f *inst/doc/litter-manual.html
 396fedfdcd4c9608244358442549a51b *inst/extdata/beach-litter-nl-2012-2017-long.csv
 c3889561e707ca952fe491acbea6c80d *inst/extdata/beach-litter-nl-2012-2017-ospar.csv
 09a803dd4701fa82abe1374d3483e705 *inst/extdata/beach-litter-nl-2012-2017-wide.csv
@@ -83,5 +83,5 @@ a6812b7138c9a40fc15ccb221c3e44bb *vignettes/fig/rstudio-pkg-man-install.png
 9dcbfaab91f2767c5de372669d593ecb *vignettes/fig/rstudio-pkg-man-update.png
 bc57a2cd9e59ff6226789f21ee57093a *vignettes/fig/trend.png
 78ff0360b73965d4d6bdaedaab906950 *vignettes/litter-installation.Rmd
-ac2d696c8a65d01b56fccb346cd2d2e5 *vignettes/litter-manual.Rmd
+2c751a99bd05b1420a0adf14712cbb7e *vignettes/litter-manual.Rmd
 342c441942985af05fc7e536ffa7afcb *vignettes/tbl/settings.csv

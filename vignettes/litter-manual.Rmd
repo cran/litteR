@@ -29,7 +29,7 @@ library(kableExtra)
 
 # Introduction
 
-`litteR` is a modular tool for analyzing litter data (_e.g._,  beach litter). The current version (`r packageVersion("litteR")`) contains the following modules:
+**litteR** is a modular tool for analyzing litter data (_e.g._,  beach litter). The current version (`r packageVersion("litteR")`) contains the following modules:
 
 - module stats: descriptive statistics;
 - module trend: non-parametric trend analysis of litter time-series;
@@ -41,10 +41,14 @@ One can optionally switch modules on or off. These modules run independently fro
 
 This user guide consists of two parts. In the first part, the user interface is described, the second part gives more details on the modules.
 
+For applications with **litteR** see Schulz _et al._ (2019).
 
-`litteR` can be loaded by means of `library(litteR)`.
 
-For applications with `litteR` see Schulz _et al._ (2019).
+
+# Loading the **litteR**-package
+
+The **litteR**-package should be loaded in **R** before you can use it. This can be done by running the following code in the **R**-console or the [RStudio](https://rstudio.com)-console: `library(litteR)`.
+
 
 
 # User interface
@@ -52,11 +56,11 @@ For applications with `litteR` see Schulz _et al._ (2019).
 
 ## Create a new project {#create_new_project}
 
-The easiest way to start working with `litteR` is to create an empty project directory. This directory can be filled with example and reference files by running:
+The easiest way to start working with **litteR** is to create an empty project directory. This directory can be filled with example and reference files by running:
 
 `create_litter_project("d:/work/litter-projects/beach-litter")`
 
-in the [RStudio](https://rstudio.com) console. For more information on how to obtain and use RStudio, consult its [website](https://rstudio.com) or read our [installation guide](litter-installation.html).
+in the [RStudio](https://rstudio.com)-console. For more information on how to obtain and use RStudio, consult its [website](https://rstudio.com) or read our [installation guide](litter-installation.html).
 
 The argument of function `create_litter_project` (_i.e._, the quoted part in parentheses) is an existing work directory on your computer. This can be any valid directory name with sufficient user privileges. Note for MS-Windows users: R requires forward slashes!
 
@@ -67,7 +71,7 @@ It is also possible to run `create_litter_project()` without an argument. In tha
 
 ## Perform litter analysis
 
-`litteR` can be started typing `litter()` in the [RStudio](https://rstudio.com) console (see the figure below).
+**litteR** can be started typing `litter()` in the [RStudio](https://rstudio.com) console (see the figure below).
 
 
 ```{r, out.width=650, fig.cap="Functions to start a litteR session.", fig.align="center"}
@@ -87,9 +91,9 @@ knitr::include_graphics("./fig/file-open-dialogue.png")
 
 ## Litter file
 
-The current version of `litteR` supports three data formats:
+The current version of **litteR** supports three data formats:
 
-- [wide format](https://en.wikipedia.org/wiki/Wide_and_narrow_data), this is `litteR`'s native and recommended format;
+- [wide format](https://en.wikipedia.org/wiki/Wide_and_narrow_data), this is **litteR**'s native and recommended format;
 - [long format](https://en.wikipedia.org/wiki/Wide_and_narrow_data);
 - [OSPAR-format](https://odims.ospar.org) (wide data format);
 
@@ -101,7 +105,7 @@ These formats will be briefly described below.
 
 [settings-file (*.yaml)](#settings)
 
-The wide format is `litteR`'s native and recommended format. It is comparable to the [OSPAR format](#ospar_format) given below, but less restrictive. The following columns are required: "region_name","country_code","country_name","location_name",and "date". The columns are separated by comma's (CSV-file)
+The wide format is **litteR**'s native and recommended format. It is comparable to the [OSPAR format](#ospar_format) given below, but less restrictive. The following columns are required: "region_name","country_code","country_name","location_name",and "date". The columns are separated by comma's (CSV-file)
 
 The image below gives an example of the wide format. 
 
@@ -162,18 +166,18 @@ path_package("litteR", "extdata", "beach-litter-nl-2012-2017-ospar.csv") %>%
 ```
 
 
-The columns are separated by comma's (CSV-file). Five columns are compulsory, _i.e._, "refno", "beach name", "country", "region", and "survey date". Note that the OSPAR date format currently does not comply with [ISO 6801](https://en.wikipedia.org/wiki/ISO_8601) standard date format. Instead, OSPAR uses dd/mm/YYYY (see the image above). However, for convenience and consistency, `litteR` also allows for dates in the ISO 6801 format. The other columns contain litter types. The names of these columns have the following format
+The columns are separated by comma's (CSV-file). Five columns are compulsory, _i.e._, "refno", "beach name", "country", "region", and "survey date". Note that the OSPAR date format currently does not comply with [ISO 6801](https://en.wikipedia.org/wiki/ISO_8601) standard date format. Instead, OSPAR uses dd/mm/YYYY (see the image above). However, for convenience and consistency, **litteR** also allows for dates in the ISO 6801 format. The other columns contain litter types. The names of these columns have the following format
 
 `litter group: litter type [litter code]`
 
 for instance, 'Plastic: Bags [2]'.
 
-Optionally, other columns may be added as metadata. However, these columns will be ignored by `litteR`.
+Optionally, other columns may be added as metadata. However, these columns will be ignored by **litteR**.
 
 
 ### Quality Control
 
-All input files are validated by `litteR`. The following validation rules apply:
+All input files are validated by **litteR**. The following validation rules apply:
 
 1. all required columns (see above) should be available;
 1. the date format should be valid, _i.e._ YYYY-mm-dd (ISO 8601) for the Wide and Long formats or dd/mm/YYYY or YYYY-mm-dd (ISO 8601) for the OSPAR format;
@@ -190,7 +194,7 @@ All input files are validated by `litteR`. The following validation rules apply:
 
 ## Settings file {#settings}
 
-The settings file contains all settings needed to run `litteR`. The settings file is in the [YAML](https://en.wikipedia.org/wiki/YAML)-format. This is a human-readable data language that is commonly used for settings files. An example of the contents of a settings file is given in the figure below.
+The settings file contains all settings needed to run **litteR**. The settings file is in the [YAML](https://en.wikipedia.org/wiki/YAML)-format. This is a human-readable data language that is commonly used for settings files. An example of the contents of a settings file is given in the figure below.
 ```{r, out.width="500px", fig.cap="Settings file in YAML-format.", fig.align='center', comment=NA}
 path_package("litteR", "extdata", "settings.yaml") %>%
     read_lines %>%
@@ -230,14 +234,14 @@ Both individual type codes and litter groups (column names) can be specified as 
 `litter_types: [[TA], [49], [SUP], [FISH]]`
 
 
-The user may use '`ospar-groups.csv`' as a template for his own group file. `litteR` will use the group file that has been specified in the [settings-file (*.yaml)](#settings), _e.g._, `file_groups: ospar-groups.csv`.
-Note that the `litteR`-user can create and use tailor-made groups files, which match the input data used. 
+The user may use '`ospar-groups.csv`' as a template for his own group file. **litteR** will use the group file that has been specified in the [settings-file (*.yaml)](#settings), _e.g._, `file_groups: ospar-groups.csv`.
+Note that the **litteR**-user can create and use tailor-made groups files, which match the input data used. 
 
 # Output
 
 ## Report
 
-`litteR` produces an HTML report that can best be viewed with modern web browsers like Mozilla FireFox, Google Chrome, or Safari. These browsers are freely available from the internet.
+**litteR** produces an HTML report that can best be viewed with modern web browsers like Mozilla FireFox, Google Chrome, or Safari. These browsers are freely available from the internet.
 
 The filename of each report starts with 'litter-report', followed by 
 
@@ -337,7 +341,7 @@ Hence, this is a test for a step trend. The [power](https://en.wikipedia.org/wik
 
 The power is useful to check if the number of surveys is sufficient. If the power is too low, sampling effort should be increased to be able to correctly detect trends. On the other hand, if the power is too high, sampling effort can be reduced. In both cases, power analysis may lead to more efficient allocation of financial resources.
 
-In `litteR`, power analysis is carried out by means of Monte Carlo simulation for different values of the reduction (effect size), sample size and statistical significance. The procedure is as follows:
+In **litteR**, power analysis is carried out by means of Monte Carlo simulation for different values of the reduction (effect size), sample size and statistical significance. The procedure is as follows:
 
 
 For each location, the time-series of the selected litter types are selected. For each of these time-series:
@@ -381,8 +385,8 @@ path_package("litteR", "extdata", "litter-stats-meta.csv") %>%
 # Troubleshooting
 
 - Dates should comply with ISO 8601, _i.e._ YYYY-mm-dd (_e.g._, 2019-09-05). If you prepare your input data with MS-Excel, make sure that the dates in the exported CSV-file also comply with this format. You can check this with a text editor (like Notepad on MS-Windows).
-- After typing `litter()` in the RStudio console, a file dialogue should appear. If that is not the case, the file dialogue is probably covered by RStudio (see the task manager or use ALT-TAB on MS-Windows to navigate to the hidden file dialogue).
-- `litteR` expects a period (.) as decimal separator (_e.g._, 8.5) and _not_ a comma (_e.g._, _not_ 8,5). In MS-Windows 7, this can be accomplished by means of the 'Region and Language' menu (_e.g._, by using the English (UK) setting). These settings are particularly important when using MS-Excel for data preparation. In cases `litteR` reports errors, you should check the file format exported by MS-Excel in a text editor (_e.g._, Notepad).
+- After typing `litter()` in the RStudio-console, a file dialogue should appear. If that is not the case, the file dialogue is probably covered by RStudio (see the task manager or use ALT-TAB on MS-Windows to navigate to the hidden file dialogue).
+- **litteR** expects a period (.) as decimal separator (_e.g._, 8.5) and _not_ a comma (_e.g._, _not_ 8,5). In MS-Windows 7, this can be accomplished by means of the 'Region and Language' menu (_e.g._, by using the English (UK) setting). These settings are particularly important when using MS-Excel for data preparation. In cases **litteR** reports errors, you should check the file format exported by MS-Excel in a text editor (_e.g._, Notepad).
 
 
 # References

@@ -1,3 +1,8 @@
+# litteR 0.6.5 (2019-10-22)
+
+* added a section to the manual on how to load (attach) litteR for users less familiar with R.
+
+
 # litteR 0.6.4 (2019-10-16)
 
 * minor textual corrections to please CRAN
