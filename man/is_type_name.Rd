@@ -22,7 +22,7 @@ addition the special code [TA] is allowed to specifiy total abundance.
 # valid litter type
 stopifnot(is_type_name("Plastic: Food [6]"))
 
-# invalid litter type: additional punctuation : and + are not allowed 
+# invalid litter type: additional punctuation : and + are not allowed
 stopifnot(!is_type_name("All cartons/tetrapaks [302:204+62+118]"))
 
 # invalid litter type: numeric litter code is missing

@@ -18,5 +18,6 @@ test statistic of a test (numeric vector of length 1).
 Extract test_statistic.
 }
 \seealso{
-\code{\link{test_statistic.wilcoxon}}, \code{\link{test_statistic.mann_kendall}}
+\code{\link{test_statistic.wilcoxon}},
+  \code{\link{test_statistic.mann_kendall}}
 }

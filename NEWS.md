@@ -1,3 +1,10 @@
+# litteR 0.6.6 (2019-11-25)
+
+* added wax and 'other polutants' to 'ospar-groups.csv'
+* updated documentation
+* better error message in case no data are available due to date selection
+
+
 # litteR 0.6.5 (2019-10-22)
 
 * added a section to the manual on how to load (attach) litteR for users less familiar with R.

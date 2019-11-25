@@ -1,10 +1,10 @@
 #' Sequenize Objects
-#' 
+#'
 #' Generic function for sequenizing objects
-#' 
+#'
 #' @param x object to sequenize
 #' @param \dots further arguments passed to or from other methods.
-#' 
+#'
 #' @seealso \code{\link{sequenize.integer}}
 #' @export
 sequenize <- function(x, ...) {
@@ -23,12 +23,12 @@ sequenize <- function(x, ...) {
 #' @importFrom dplyr lag
 #'
 #' @return object of class \code{sequenized}
-#' 
+#'
 #' @seealso \code{\link{toString}}
 #' @export
-#' 
+#'
 #' @note The elements of \code{x} should be unique and in ascending order.
-#' 
+#'
 #' @examples
 #' toString(sequenize(c(1:4, 8:9)))
 sequenize.integer <- function(x, ...) {
@@ -57,7 +57,7 @@ sequenize.integer <- function(x, ...) {
 #'
 #' @param x object of class \code{sequenized}.
 #' @param \dots further arguments passed to or from other methods.
-#' @return string representation (character vector of length 1) of 
+#' @return string representation (character vector of length 1) of
 #' a sequenized object
 #' @seealso \code{\link{sequenize.integer}}
 #' @export
@@ -80,9 +80,9 @@ toString.sequenized <- function(x, ...) {
 
 
 #' Enumerate Objects
-#' 
+#'
 #' Generic function for enumerating objects
-#' 
+#'
 #' @param x object to enumerate
 #' @param \dots further arguments passed to or from other methods.
 #' @seealso \code{\link{enumerate.character}}
@@ -93,18 +93,18 @@ enumerate <- function(x, ...) {
 
 
 #' Enumerate Character Vector
-#' 
-#' Collapsing a \code{character} vector of length n, to a 
+#'
+#' Collapsing a \code{character} vector of length n, to a
 #' \code{character} vector of length 1.
 #'
 #' @param x character vector
 #' @param \dots further arguments passed to or from other methods.
 #'
-#' @return \code{character} vector of length 1, with elements 
+#' @return \code{character} vector of length 1, with elements
 #' separated by a comma except for the last element which
 #' is prepended by "and".
-#' 
-#' @examples 
+#'
+#' @examples
 #' enumerate("apples")
 #' enumerate(c("apples", "oranges"))
 #' enumerate(c("apples", "oranges", "pears"))
@@ -128,25 +128,25 @@ enumerate.character <- function(x, ...) {
 #' The OSPAR format consists of a litter category, a specification,
 #' and an integer code in the range 000-989 in square brackets. In
 #' addition the special code [TA] is allowed to specifiy total abundance.
-#' 
+#'
 #' @param x \code{character} vector to check.
 #'
 #' @return \code{TRUE} if \code{x} complies with OSPAR, \code{FALSE} if not.
-#' 
+#'
 #' @importFrom stringr str_detect
-#' 
+#'
 #' @export
 #'
 #' @examples
 #' # valid litter type
 #' stopifnot(is_type_name("Plastic: Food [6]"))
-#' 
-#' # invalid litter type: additional punctuation : and + are not allowed 
+#'
+#' # invalid litter type: additional punctuation : and + are not allowed
 #' stopifnot(!is_type_name("All cartons/tetrapaks [302:204+62+118]"))
-#' 
+#'
 #' # invalid litter type: numeric litter code is missing
 #' stopifnot(!(is_type_name("no litter here")))
-#' 
+#'
 #' # invalid litter type: number greater than 989
 #' stopifnot(!(is_type_name("Survey: Remarks [999]")))
 #' stopifnot(!is_type_name("[TA]"))
@@ -157,7 +157,7 @@ is_type_name <- function(x) {
 
 
 #' Test For Type Code
-#' 
+#'
 #' Test if \code{x} contains a valid litter type code.
 #'
 #' @param x \code{character} vector to test
@@ -169,7 +169,7 @@ is_type_code <- function(x) {
 }
 
 #' Test For Group Code
-#' 
+#'
 #' Test if \code{x} contains a valid litter group code.
 #'
 #' @param x \code{character} vector to test
@@ -181,25 +181,25 @@ is_group_code <- function(x) {
 
 
 #' Extract Litter Code
-#' 
+#'
 #' Extract litter codes (ASCII characters in square brackets) from character
 #' vector \code{x}.
 #'
 #' @param x \code{character} vector containg litter codes
 #'
 #' @return litter code (\code{character} vector).
-#' 
+#'
 #' @importFrom dplyr if_else
 #' @importFrom stringr str_replace
-#' 
+#'
 #' @export
 #'
 #' @examples
 #' # valid litter type
 #' stopifnot(get_type_code("Plastic: Food [6]") == "[6]")
 #' stopifnot(get_type_code(c("Plastic: Food [6]", "Plastic: Shoes [44]")) == c("[6]", "[44]"))
-#' 
-#' # invalid litter type: additional punctuation : and + are not allowed 
+#'
+#' # invalid litter type: additional punctuation : and + are not allowed
 #' stopifnot(is.na(get_type_code("All cartons/tetrapaks [302:204+62+118]")))
 #' stopifnot(is.na(get_type_code("[TA]")))
 get_type_code <- function(x) {
@@ -214,16 +214,16 @@ get_type_code <- function(x) {
 
 
 #' Extract Litter Group Code
-#' 
+#'
 #' Extracts litter group code (i.e., a code in square brackets),
 #' from a \code{character} vector.
 #'
 #' @param x \code{character} vector containg litter group codes
 #'
 #' @return \code{character} vector of litter group codes
-#' 
+#'
 #' @importFrom stringr str_replace
-#' 
+#'
 #' @export
 #'
 #' @examples
@@ -244,18 +244,19 @@ get_group_code <- function(x) {
 #' Test for Natural Numbers
 #'
 #' Test for natural numbers according to ISO 80000-2, that is the set  {0, 1, 2, ...}
-#' 
+#'
 #' @param x \code{numeric} vector
 #'
-#' @return \code{TRUE} in case \code{x} is a natural number, \code{FALSE} otherwise.
+#' @return \code{TRUE} in case \code{x} is a natural number,
+#'   \code{FALSE} otherwise.
 #'
-#' @examples 
+#' @examples
 #' stopifnot(!is_natural_number(3.1))
 #' stopifnot(!is_natural_number(2.99))
 #' stopifnot(is_natural_number(3))
 #' stopifnot(all(is_natural_number(0:9)))
 #' stopifnot(sum(is_natural_number(c(1, 2.5, 3))) == 2)
-#'   
+#'
 #' @export
 is_natural_number <- function(x) {
     if (!is.numeric(x)) {
@@ -268,13 +269,13 @@ is_natural_number <- function(x) {
 
 
 #' Check Date Format
-#' 
+#'
 #' Checks if the data format \code{x} complies with \code{format}.
-#' 
+#'
 #' @param x object of class \code{character} or \code{Date}
 #' @param format required date format (see \code{\link{strptime}})
-#' 
-#' @return \code{TRUE} if \code{x} complies with \code{format}, 
+#'
+#' @return \code{TRUE} if \code{x} complies with \code{format},
 #' and \code{FALSE} otherwise.
 #' @examples
 #' is_date_format("2019-05-14", "%Y-%m-%d")

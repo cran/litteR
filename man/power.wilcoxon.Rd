@@ -21,7 +21,7 @@
 power (numeric vector of length 1).
 }
 \description{
-Estimates the power of a Wilcoxon test by means of 
+Estimates the power of a Wilcoxon test by means of
 Monte Carlo simulation.
 }
 \examples{

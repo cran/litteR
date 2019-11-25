@@ -1,7 +1,7 @@
 ---
 title:  | 
-        | <font size="1"><i> &copy; 2018-2019 D.J.J. Walvoort & W.M.G.M Van Loon. [MIT-license](https://opensource.org/licenses/MIT). `r sprintf("litteR version: %s (%s)", packageVersion("litteR"), packageDate("litteR"))`</i></font>
         | <font color="blue"> LitteR - Analysis of Litter Data</font>
+        | <font size="1"><i> &copy; 2018-2019 D.J.J. Walvoort & W.M.G.M Van Loon. [MIT-license](https://opensource.org/licenses/MIT). `r sprintf("litteR version: %s (%s)", packageVersion("litteR"), packageDate("litteR"))`</i></font>
 author: |
         | Dennis Walvoort (<font size="1">WENR-WUR, The Netherlands</font>) Willem van Loon (<font size="1">RWS, The Netherlands</font>)
 date:   | 
@@ -314,7 +314,7 @@ This report can best be viewed with the latest versions of web browsers like Goo
 )
 
 (DATE_FROM > DATE_TO) && stop(
-    "first year '%s' is later than final year '%s'" %>%
+    "first date '%s' is later than final date '%s'" %>%
         sprintf(DATE_FROM, DATE_TO),
     call. = FALSE
 )
@@ -359,6 +359,13 @@ d_all <- INPUT_FILE_NAME %>%
   read_litter %>%
   select(-country_name) %>%
   filter(date %>% between(DATE_FROM, DATE_TO))
+
+(nrow(d_all) == 0) && stop(
+    "No data available between '%s' and '%s'.\nPlease check '%s' and '%s'." %>%
+        sprintf(DATE_FROM, DATE_TO, path_file(INPUT_FILE_NAME), "settings.yaml"),
+    call. = FALSE
+)
+
 ```
 
 

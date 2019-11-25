@@ -11,6 +11,6 @@ create_litter_project(path = NULL)
 }
 \description{
 Fills an empty directory (\code{path}) with example files. If the
-\code{path}' argument is missing or \code{NULL}, 
+\code{path}' argument is missing or \code{NULL},
 a Tcl/Tk dialogue will be started.
 }

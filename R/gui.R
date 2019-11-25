@@ -1,14 +1,14 @@
 #' Graphical User Interface to the litteR-package
 #'
-#' Starts a graphical user interface for analysing litter data. 
-#' A Tcl/Tk-dialogue will be started if one or more arguments 
+#' Starts a graphical user interface for analysing litter data.
+#' A Tcl/Tk-dialogue will be started if one or more arguments
 #' are missing.
-#' 
+#'
 #' @param file file containing litter data (see vignette for details)
-#' 
-#' @return An HTML-document in which all the litter analysis results 
+#'
+#' @return An HTML-document in which all the litter analysis results
 #' (tables, figures, explanotory text) are reported.
-#' 
+#'
 #' @importFrom tcltk tk_choose.files tk_choose.dir
 #' @importFrom rmarkdown render html_document
 #' @importFrom purrr "%>%" chuck flatten_chr map_chr
@@ -17,7 +17,7 @@
 #' @importFrom rlang is_null is_na
 #' @importFrom stringr str_c str_sub str_to_upper
 #' @importFrom fs path path_norm path_package file_temp dir_copy path_dir
-#' 
+#'
 #' @export
 litter <- function(file = NULL) {
 
@@ -44,7 +44,7 @@ litter <- function(file = NULL) {
         }
     }
 
-    # extract work directory    
+    # extract work directory
     dir_output <- file %>%
         path_dir
 
@@ -54,7 +54,7 @@ litter <- function(file = NULL) {
         read_lines %>%
         yaml.load %>%
         c(file_input = path_norm(file))
-    
+
     # add path to groups file
     pars$file_groups <- pars %>%
         chuck("file_groups") %>%
@@ -128,15 +128,15 @@ litter <- function(file = NULL) {
 #' Create Project Directory
 #'
 #' Fills an empty directory (\code{path}) with example files. If the
-#' \code{path}' argument is missing or \code{NULL}, 
+#' \code{path}' argument is missing or \code{NULL},
 #' a Tcl/Tk dialogue will be started.
-#' 
+#'
 #' @param path (Existing) directory name
-#' 
+#'
 #' @importFrom tcltk tk_choose.files tk_choose.dir
 #' @importFrom fs path_package dir_exists dir_ls file_copy path_dir
 #' @importFrom rlang is_null
-#' 
+#'
 #' @export
 create_litter_project <- function(path = NULL) {
 

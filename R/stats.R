@@ -23,8 +23,9 @@ p_value <- function(x, ...) {
 #' @param x object
 #' @param \dots further arguments passed to or from other methods.
 #' @return test statistic of a test (numeric vector of length 1).
-#' 
-#' @seealso \code{\link{test_statistic.wilcoxon}}, \code{\link{test_statistic.mann_kendall}}
+#'
+#' @seealso \code{\link{test_statistic.wilcoxon}},
+#'   \code{\link{test_statistic.mann_kendall}}
 #'
 #' @export
 test_statistic <- function(x, ...) {
@@ -89,7 +90,8 @@ intercept <- function(x, ...) {
 #' @importFrom stats cor.test
 #' @export
 #'
-#' @seealso \code{\link{test_statistic}}, \code{\link{p_value}}, \code{\link{cor.test}}
+#' @seealso \code{\link{test_statistic}}, \code{\link{p_value}},
+#'   \code{\link{cor.test}}
 #'
 #' @examples
 #'
@@ -168,11 +170,11 @@ p_value.mann_kendall <- function(x, ...) {
 #' @param x time vector (\code{numeric}, or \code{Date}).
 #' @param y numeric value.
 #' @param \dots further arguments passed to or from other methods.
-#' 
+#'
 #' @references \url{https://en.wikipedia.org/wiki/Theil-Sen_estimator}
 #' @return object of class \code{Theil_Sen}.
 #' @importFrom stats median
-#' 
+#'
 #' @export
 #' @examples
 #'
@@ -282,7 +284,7 @@ rmad <- function(x, na.rm = FALSE) {
 
 
 #' Index of Dispersion
-#' 
+#'
 #' A normalized measure of the dispersion of a probability distribution.
 #'
 #' @param x a numeric vector
@@ -308,14 +310,14 @@ iod <- function(x, na.rm = FALSE) {
 #' @param count counts for each litter type
 #' @param fraction fraction of most abundant types (numeric value in [0, 1])
 #'
-#' @return Fraction of most abundant litter types in descending order 
+#' @return Fraction of most abundant litter types in descending order
 #'         (numeric vector of length 1).
 #'
 #' @importFrom purrr "%>%"
 #'
 #' @export
 top <- function(type, count, fraction = 0.8) {
-    if ( (fraction <= 0) | (fraction > 1) ) {
+    if ((fraction <= 0) | (fraction > 1)) {
         stop(
             "0 < fraction <= 1 is not true",
             call. = FALSE
@@ -336,7 +338,7 @@ top <- function(type, count, fraction = 0.8) {
 
 
 #' Rolling Statistics
-#' 
+#'
 #' Applies function \code{fun} within a rolling (moving) window
 #' of size \code{w} to vector numeric vector \code{x}.
 #'
@@ -472,8 +474,8 @@ p_value.wilcoxon <- function(x, ...) {
 
 
 #' Power of Wilcoxon Test
-#' 
-#' Estimates the power of a Wilcoxon test by means of 
+#'
+#' Estimates the power of a Wilcoxon test by means of
 #' Monte Carlo simulation.
 #'
 #' @param x numeric vector
@@ -515,7 +517,7 @@ power.wilcoxon <- function(x, n = 10, alpha = 0.05, n_sim = 1000, ...) {
 
 #' Tukey's Trimean
 #'
-#' Robust centrality measure estimated as the weighted average of 
+#' Robust centrality measure estimated as the weighted average of
 #' the three quartiles: \eqn{(Q_1 + 2Q_2 + Q_3) / 4}, where
 #' \eqn{Q_1, Q_2} and \eqn{Q_3} are the first, second and third
 #' quartiles respectively.
@@ -523,20 +525,20 @@ power.wilcoxon <- function(x, n = 10, alpha = 0.05, n_sim = 1000, ...) {
 #' @param x numeric vector
 #' @param \dots further arguments passed to or from other methods.
 #' @return trimean (numeric value of length 1).
-#' 
+#'
 #' @references \url{https://en.wikipedia.org/wiki/Trimean}
-#' 
+#'
 #' @export
 trimean <- function(x, ...) {
     UseMethod("trimean", x)
 }
 
 #' @describeIn trimean Tukey's trimean
-#' 
+#'
 #' @examples
 #' stopifnot(trimean(0:100) == mean(0:100))
 #' stopifnot(trimean(0:100) == median(0:100))
-#' 
+#'
 #' @export
 trimean.default <- function(x, ...) {
     x %>%
@@ -555,13 +557,14 @@ trimean.default <- function(x, ...) {
 #' @param x numeric vector
 #' @param \dots further arguments passed to or from other methods.
 #' @return medcouple (numeric vector of length 1).
-#' @note This is a naive, but robust en simple implementation. For a more 
+#' @note This is a naive, but robust en simple implementation. For a more
 #' efficient implementation see package
 #' \href{https://CRAN.R-project.org/package=robustbase}{robustbase} and the
 #' references section below.
-#' 
-#' @references Brys, G., M. Hubert, A. Struyf, 2004. A Robust Measure of Skewness. 
-#'   Journal of Computational and Graphical Statistics 13: 996-1017. 
+#'
+#' @references Brys, G., M. Hubert, A. Struyf, 2004.
+#'   A Robust Measure of Skewness.
+#'   Journal of Computational and Graphical Statistics 13: 996-1017.
 #'   \doi{10.1198/106186004X12632}.
 #'
 #' @export
@@ -572,7 +575,7 @@ medcouple <- function(x, ...) {
 
 
 #' @describeIn medcouple default method
-#' 
+#'
 #' @importFrom purrr %>% chuck
 #' @export
 medcouple.default <- function(x, ...) {
@@ -621,20 +624,20 @@ medcouple.default <- function(x, ...) {
 #' Adjusted Boxplot Statistics
 #'
 #' Adjusted boxplot statistics according to Hubert & Vandervieren (2008).
-#' The upper whisker extends from the hinge to the largest value no further 
-#' than the upper fence. Similarly, the lower whisker extends from the hinge to the 
-#' smallest value no further than the lower fence. See Hubert & 
+#' The upper whisker extends from the hinge to the largest value no further
+#' than the upper fence. Similarly, the lower whisker extends from the hinge to
+#' the smallest value no further than the lower fence. See Hubert &
 #' Vandervieren (2008, p.5191, Eq.5).
 #'
 #' @param x numeric vector
 #' @param \dots further arguments passed to or from other methods.
-#' 
-#' @return Numeric vector consisting of respectively the lower 
-#'   whisker/fence, the first quartile/hinge, the median, the third 
+#'
+#' @return Numeric vector consisting of respectively the lower
+#'   whisker/fence, the first quartile/hinge, the median, the third
 #'   quartile/hinge, and the upper whisker/fence.
-#' 
-#' @references Hubert, M., and E. Vandervieren, 2008. 
-#' An adjusted boxplot for skewed distributions. 
+#'
+#' @references Hubert, M., and E. Vandervieren, 2008.
+#' An adjusted boxplot for skewed distributions.
 #' Computational Statistics and Data Analysis 52:5186-5201
 #' \doi{10.1016/j.csda.2007.11.008}
 #'
@@ -646,7 +649,7 @@ adj_boxplot_stats <- function(x, ...) {
 
 
 #' @describeIn adj_boxplot_stats Adjusted Boxplot Statistics
-#' 
+#'
 #' @importFrom purrr %>%
 #' @importFrom stats quantile
 #' @export

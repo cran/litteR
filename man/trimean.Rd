@@ -18,7 +18,7 @@ trimean(x, ...)
 trimean (numeric value of length 1).
 }
 \description{
-Robust centrality measure estimated as the weighted average of 
+Robust centrality measure estimated as the weighted average of
 the three quartiles: \eqn{(Q_1 + 2Q_2 + Q_3) / 4}, where
 \eqn{Q_1, Q_2} and \eqn{Q_3} are the first, second and third
 quartiles respectively.

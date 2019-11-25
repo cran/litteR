@@ -10,7 +10,8 @@ is_natural_number(x)
 \item{x}{\code{numeric} vector}
 }
 \value{
-\code{TRUE} in case \code{x} is a natural number, \code{FALSE} otherwise.
+\code{TRUE} in case \code{x} is a natural number,
+  \code{FALSE} otherwise.
 }
 \description{
 Test for natural numbers according to ISO 80000-2, that is the set  {0, 1, 2, ...}
@@ -21,5 +22,5 @@ stopifnot(!is_natural_number(2.99))
 stopifnot(is_natural_number(3))
 stopifnot(all(is_natural_number(0:9)))
 stopifnot(sum(is_natural_number(c(1, 2.5, 3))) == 2)
-  
+
 }

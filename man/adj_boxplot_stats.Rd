@@ -15,15 +15,15 @@ adj_boxplot_stats(x, ...)
 \item{\dots}{further arguments passed to or from other methods.}
 }
 \value{
-Numeric vector consisting of respectively the lower 
-  whisker/fence, the first quartile/hinge, the median, the third 
+Numeric vector consisting of respectively the lower
+  whisker/fence, the first quartile/hinge, the median, the third
   quartile/hinge, and the upper whisker/fence.
 }
 \description{
 Adjusted boxplot statistics according to Hubert & Vandervieren (2008).
-The upper whisker extends from the hinge to the largest value no further 
-than the upper fence. Similarly, the lower whisker extends from the hinge to the 
-smallest value no further than the lower fence. See Hubert & 
+The upper whisker extends from the hinge to the largest value no further
+than the upper fence. Similarly, the lower whisker extends from the hinge to
+the smallest value no further than the lower fence. See Hubert &
 Vandervieren (2008, p.5191, Eq.5).
 }
 \section{Methods (by class)}{
@@ -32,8 +32,8 @@ Vandervieren (2008, p.5191, Eq.5).
 }}
 
 \references{
-Hubert, M., and E. Vandervieren, 2008. 
-An adjusted boxplot for skewed distributions. 
+Hubert, M., and E. Vandervieren, 2008.
+An adjusted boxplot for skewed distributions.
 Computational Statistics and Data Analysis 52:5186-5201
 \doi{10.1016/j.csda.2007.11.008}
 }

@@ -13,7 +13,7 @@ read_litter(file)
 \code{tibble} with litter data in long format
 }
 \description{
-Reads litter data from various formats. Currently only the 
+Reads litter data from various formats. Currently only the
 OSPAR data snapshot format, a long format, and a wide format
 are supported. See the package vignette for more details.
 }

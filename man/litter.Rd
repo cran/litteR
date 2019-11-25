@@ -10,11 +10,11 @@ litter(file = NULL)
 \item{file}{file containing litter data (see vignette for details)}
 }
 \value{
-An HTML-document in which all the litter analysis results 
+An HTML-document in which all the litter analysis results
 (tables, figures, explanotory text) are reported.
 }
 \description{
-Starts a graphical user interface for analysing litter data. 
-A Tcl/Tk-dialogue will be started if one or more arguments 
+Starts a graphical user interface for analysing litter data.
+A Tcl/Tk-dialogue will be started if one or more arguments
 are missing.
 }

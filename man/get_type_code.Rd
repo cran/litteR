@@ -21,7 +21,7 @@ vector \code{x}.
 stopifnot(get_type_code("Plastic: Food [6]") == "[6]")
 stopifnot(get_type_code(c("Plastic: Food [6]", "Plastic: Shoes [44]")) == c("[6]", "[44]"))
 
-# invalid litter type: additional punctuation : and + are not allowed 
+# invalid litter type: additional punctuation : and + are not allowed
 stopifnot(is.na(get_type_code("All cartons/tetrapaks [302:204+62+118]")))
 stopifnot(is.na(get_type_code("[TA]")))
 }

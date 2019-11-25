@@ -13,7 +13,7 @@
 
 <meta name="author" content="Dennis Walvoort Wageningen Environmental Research, The Netherlands Willem van Loon  Rijkswaterstaat, The Netherlands" />
 
-<meta name="date" content="2019-10-22" />
+<meta name="date" content="2019-11-25" />
 
 <title>litteR User Manual</title>
 
@@ -227,7 +227,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">litteR User Manual</h1>
 <h4 class="author">Dennis Walvoort <font size="1">Wageningen Environmental Research, The Netherlands</font><br>Willem van Loon <font size="1"> Rijkswaterstaat, The Netherlands</font></h4>
-<h4 class="date">2019-10-22</h4>
+<h4 class="date">2019-11-25</h4>
 
 
 <div id="TOC">
@@ -266,7 +266,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p><strong>litteR</strong> is a modular tool for analyzing litter data (<em>e.g.</em>, beach litter). The current version (0.6.5) contains the following modules:</p>
+<p><strong>litteR</strong> is a modular tool for analyzing litter data (<em>e.g.</em>, beach litter). The current version (0.6.6) contains the following modules:</p>
 <ul>
 <li>module stats: descriptive statistics;</li>
 <li>module trend: non-parametric trend analysis of litter time-series;</li>
@@ -399,42 +399,42 @@ File open dialogue.
 <p>The OSPAR format is a wide format, meaning that all litter types are stored in columns and each row represents a survey. OSPAR beach litter data can be downloaded from the <a href="https://odims.ospar.org">OSPAR website</a>.</p>
 <p>The image below gives an example of the first 10 columns and records of litter data in the OSPAR-format.</p>
 <pre><code># A tibble: 10 x 10
-   RefNo `Beach name` Country     Region                `Survey date`
-   &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;                 &lt;chr&gt;        
- 1 NL001 Bergen       Netherlands 3. Southern North Sea 27/01/2012   
- 2 NL001 Bergen       Netherlands 3. Southern North Sea 20/04/2012   
- 3 NL001 Bergen       Netherlands 3. Southern North Sea 22/07/2012   
- 4 NL001 Bergen       Netherlands 3. Southern North Sea 19/10/2012   
- 5 NL001 Bergen       Netherlands 3. Southern North Sea 19/02/2013   
- 6 NL001 Bergen       Netherlands 3. Southern North Sea 11/04/2013   
- 7 NL001 Bergen       Netherlands 3. Southern North Sea 20/07/2013   
- 8 NL001 Bergen       Netherlands 3. Southern North Sea 16/10/2013   
- 9 NL001 Bergen       Netherlands 3. Southern North Sea 08/01/2014   
-10 NL001 Bergen       Netherlands 3. Southern North Sea 23/04/2014   
-   Period `Plastic: Yokes [1]` `Plastic: Bags [2]`
-    &lt;dbl&gt;                &lt;dbl&gt;               &lt;dbl&gt;
- 1      1                    0                   3
- 2      2                    0                   8
- 3      3                    0                   1
- 4      4                    0                   2
- 5     -1                    0                  24
- 6      2                    0                   0
- 7      3                    0                  10
- 8      4                    0                   7
- 9      1                    0                   9
-10      2                    0                  10
-   `Plastic: Small_bags [3]` `Plastic: Bag_ends [112]`
-                       &lt;dbl&gt;                     &lt;dbl&gt;
- 1                         9                         0
- 2                        12                         0
- 3                         5                         0
- 4                         4                         0
- 5                        23                        13
- 6                         9                         1
- 7                         4                         0
- 8                         5                         1
- 9                        20                         0
-10                        29                         0</code></pre>
+   RefNo `Beach name` Country     Region                `Survey date` Period
+   &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;                 &lt;chr&gt;          &lt;dbl&gt;
+ 1 NL001 Bergen       Netherlands 3. Southern North Sea 27/01/2012         1
+ 2 NL001 Bergen       Netherlands 3. Southern North Sea 20/04/2012         2
+ 3 NL001 Bergen       Netherlands 3. Southern North Sea 22/07/2012         3
+ 4 NL001 Bergen       Netherlands 3. Southern North Sea 19/10/2012         4
+ 5 NL001 Bergen       Netherlands 3. Southern North Sea 19/02/2013        -1
+ 6 NL001 Bergen       Netherlands 3. Southern North Sea 11/04/2013         2
+ 7 NL001 Bergen       Netherlands 3. Southern North Sea 20/07/2013         3
+ 8 NL001 Bergen       Netherlands 3. Southern North Sea 16/10/2013         4
+ 9 NL001 Bergen       Netherlands 3. Southern North Sea 08/01/2014         1
+10 NL001 Bergen       Netherlands 3. Southern North Sea 23/04/2014         2
+   `Plastic: Yokes [1]` `Plastic: Bags [2]` `Plastic: Small_bags [3]`
+                  &lt;dbl&gt;               &lt;dbl&gt;                     &lt;dbl&gt;
+ 1                    0                   3                         9
+ 2                    0                   8                        12
+ 3                    0                   1                         5
+ 4                    0                   2                         4
+ 5                    0                  24                        23
+ 6                    0                   0                         9
+ 7                    0                  10                         4
+ 8                    0                   7                         5
+ 9                    0                   9                        20
+10                    0                  10                        29
+   `Plastic: Bag_ends [112]`
+                       &lt;dbl&gt;
+ 1                         0
+ 2                         0
+ 3                         0
+ 4                         0
+ 5                        13
+ 6                         1
+ 7                         0
+ 8                         1
+ 9                         0
+10                         0</code></pre>
 <p>The columns are separated by comma’s (CSV-file). Five columns are compulsory, <em>i.e.</em>, “refno”, “beach name”, “country”, “region”, and “survey date”. Note that the OSPAR date format currently does not comply with <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 6801</a> standard date format. Instead, OSPAR uses dd/mm/YYYY (see the image above). However, for convenience and consistency, <strong>litteR</strong> also allows for dates in the ISO 6801 format. The other columns contain litter types. The names of these columns have the following format</p>
 <p><code>litter group: litter type [litter code]</code></p>
 <p>for instance, ‘Plastic: Bags [2]’.</p>
@@ -447,7 +447,7 @@ File open dialogue.
 <li>all required columns (see above) should be available;</li>
 <li>the date format should be valid, <em>i.e.</em> YYYY-mm-dd (ISO 8601) for the Wide and Long formats or dd/mm/YYYY or YYYY-mm-dd (ISO 8601) for the OSPAR format;</li>
 <li>litter type names should adhere to the specifications given above;</li>
-<li>abundances need to be <a href="https://en.wikipedia.org/wiki/Natural_number">natural numbers</a> (ISO 80000-2);</li>
+<li>abundances are <a href="https://en.wikipedia.org/wiki/Natural_number">natural numbers</a> (ISO 80000-2);</li>
 <li>all records should be unique, duplicated records will be removed with a warning;</li>
 <li>all cells should be filled with the appropriate data type (numbers, text or dates).</li>
 </ol>
@@ -1136,6 +1136,7 @@ count
 <li>Dates should comply with ISO 8601, <em>i.e.</em> YYYY-mm-dd (<em>e.g.</em>, 2019-09-05). If you prepare your input data with MS-Excel, make sure that the dates in the exported CSV-file also comply with this format. You can check this with a text editor (like Notepad on MS-Windows).</li>
 <li>After typing <code>litter()</code> in the RStudio-console, a file dialogue should appear. If that is not the case, the file dialogue is probably covered by RStudio (see the task manager or use ALT-TAB on MS-Windows to navigate to the hidden file dialogue).</li>
 <li><strong>litteR</strong> expects a period (.) as decimal separator (<em>e.g.</em>, 8.5) and <em>not</em> a comma (<em>e.g.</em>, <em>not</em> 8,5). In MS-Windows 7, this can be accomplished by means of the ‘Region and Language’ menu (<em>e.g.</em>, by using the English (UK) setting). These settings are particularly important when using MS-Excel for data preparation. In cases <strong>litteR</strong> reports errors, you should check the file format exported by MS-Excel in a text editor (<em>e.g.</em>, Notepad).</li>
+<li>When <strong>litteR</strong> complains about an <code>invalid multibyte string</code>, there is a character in your input file that is not part of the English alphabet. Substituting this character by a valid character in the range A-Z or a-z usually solves this problem.</li>
 </ul>
 </div>
 <div id="references" class="section level1">

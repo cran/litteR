@@ -12,7 +12,7 @@ is_date_format(x, format)
 \item{format}{required date format (see \code{\link{strptime}})}
 }
 \value{
-\code{TRUE} if \code{x} complies with \code{format}, 
+\code{TRUE} if \code{x} complies with \code{format},
 and \code{FALSE} otherwise.
 }
 \description{

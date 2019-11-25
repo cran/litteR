@@ -44,5 +44,6 @@ test_statistic(mk)
 p_value(mk)
 }
 \seealso{
-\code{\link{test_statistic}}, \code{\link{p_value}}, \code{\link{cor.test}}
+\code{\link{test_statistic}}, \code{\link{p_value}},
+  \code{\link{cor.test}}
 }

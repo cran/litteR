@@ -12,7 +12,7 @@
 \item{\dots}{further arguments passed to or from other methods.}
 }
 \value{
-string representation (character vector of length 1) of 
+string representation (character vector of length 1) of
 a sequenized object
 }
 \description{

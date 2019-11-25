@@ -223,7 +223,8 @@ validate.ospar <- function(x, ...) {
     has_duplicates <- duplicated(x)
     if (any(has_duplicates)) {
         warning(
-            "The following records are duplicated and will be removed:\n",
+            "The following records are duplicated and ",
+            "only the first record will be retained:\n",
             toString(sequenize(which(has_duplicates))),
             call. = FALSE
         )
@@ -334,7 +335,8 @@ validate.long <- function(x, ...) {
     has_duplicates <- duplicated(x)
     if (any(has_duplicates)) {
         warning(
-            "The following records are duplicated and will be removed:\n",
+            "The following records are duplicated and ",
+            "only the first record will be retained:\n",
             toString(sequenize(which(has_duplicates))),
             call. = FALSE
         )
@@ -429,7 +431,8 @@ validate.wide <- function(x, ...) {
     has_duplicates <- duplicated(x)
     if (any(has_duplicates)) {
         warning(
-            "The following records are duplicated and will be removed:\n",
+            "The following records are duplicated and ",
+            "only the first record will be retained:\n",
             toString(sequenize(which(has_duplicates))),
             call. = FALSE
         )
@@ -472,7 +475,7 @@ validate.wide <- function(x, ...) {
 
 #' Read Litter Data
 #'
-#' Reads litter data from various formats. Currently only the 
+#' Reads litter data from various formats. Currently only the
 #' OSPAR data snapshot format, a long format, and a wide format
 #' are supported. See the package vignette for more details.
 #'
@@ -505,8 +508,8 @@ read_litter <- function(file) {
         call. = FALSE
     )
 
-    
-    
+
+
     # read file
     d <- suppressMessages(read_csv(file, guess_max = 1000000))
 
@@ -531,7 +534,7 @@ read_litter <- function(file) {
 
 
 #' Read Litter Groups
-#' 
+#'
 #' Read the file that links litter codes to litter groups.
 #' See the package vignette for more details.
 #'

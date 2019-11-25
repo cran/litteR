@@ -1,4 +1,4 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   echo = FALSE,
@@ -13,21 +13,21 @@ library(kableExtra)
 ## ---- out.width=650, fig.cap="Functions to start a litteR session.", fig.align="center"----
 knitr::include_graphics("./fig/r-console.png")
 
-## ---- out.width=650, fig.cap="File open dialogue.", fig.align="center"----
+## ---- out.width=650, fig.cap="File open dialogue.", fig.align="center"--------
 knitr::include_graphics("./fig/file-open-dialogue.png")
 
-## ---- message=FALSE, comment=NA------------------------------------------
+## ---- message=FALSE, comment=NA-----------------------------------------------
 path_package("litteR", "extdata", "beach-litter-nl-2012-2017-wide.csv") %>%
     read_csv %>%
     select(1:8) %>%
     slice(1:10)
 
-## ---- message=FALSE, comment=NA------------------------------------------
+## ---- message=FALSE, comment=NA-----------------------------------------------
 path_package("litteR", "extdata", "beach-litter-nl-2012-2017-long.csv") %>%
     read_csv %>%
     slice(1:10)
 
-## ---- message=FALSE, comment=NA------------------------------------------
+## ---- message=FALSE, comment=NA-----------------------------------------------
 path_package("litteR", "extdata", "beach-litter-nl-2012-2017-ospar.csv") %>%
     read_csv %>%
     select(1:10) %>%
@@ -38,7 +38,7 @@ path_package("litteR", "extdata", "settings.yaml") %>%
     read_lines %>%
     cat(sep = "\n")
 
-## ----message=FALSE-------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 "./tbl/settings.csv" %>%
     read_csv(
         col_types = cols(
@@ -66,7 +66,7 @@ knitr::include_graphics("./fig/baseline-table.png")
 ## ---- out.width=650, fig.cap="Example of a power analysis plot. It gives the power (y-axis) as function of the number of surveys (x-axis) for different effect sizes (see legend).", fig.align="center"----
 knitr::include_graphics("./fig/power.png")
 
-## ---- message=FALSE, comment=NA------------------------------------------
+## ---- message=FALSE, comment=NA-----------------------------------------------
 path_package("litteR", "extdata", "litter-stats-meta.csv") %>%
     read_csv %>% 
     kable(align = "lll")

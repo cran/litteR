@@ -1,7 +1,7 @@
 Package: litteR
 Title: Litter Analysis
-Version: 0.6.5
-Date: 2019-10-22
+Version: 0.6.6
+Date: 2019-11-25
 Authors@R: c(person(given = "Dennis",
     family = "Walvoort", email = "dennis.Walvoort@wur.nl", role = c("aut",
     "cre", "cph")), person(given = "Willem", family = "van Loon", email =
@@ -27,12 +27,12 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.1
 NeedsCompilation: no
-Packaged: 2019-10-22 10:32:29 UTC; walvo001
+Packaged: 2019-11-25 18:33:40 UTC; dennis
 Author: Dennis Walvoort [aut, cre, cph],
   Willem van Loon [aut, cph],
   Rijkswaterstaat - The Netherlands [cph, fnd, dtc]
 Maintainer: Dennis Walvoort <dennis.Walvoort@wur.nl>
 Repository: CRAN
-Date/Publication: 2019-10-22 11:20:06 UTC
+Date/Publication: 2019-11-25 18:50:02 UTC

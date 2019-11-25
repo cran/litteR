@@ -12,12 +12,12 @@
 \item{\dots}{further arguments passed to or from other methods.}
 }
 \value{
-\code{character} vector of length 1, with elements 
+\code{character} vector of length 1, with elements
 separated by a comma except for the last element which
 is prepended by "and".
 }
 \description{
-Collapsing a \code{character} vector of length n, to a 
+Collapsing a \code{character} vector of length n, to a
 \code{character} vector of length 1.
 }
 \examples{

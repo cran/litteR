@@ -26,13 +26,14 @@ Robust statistic that quantifies the skewness of univariate distributions.
 }}
 
 \note{
-This is a naive, but robust en simple implementation. For a more 
+This is a naive, but robust en simple implementation. For a more
 efficient implementation see package
 \href{https://CRAN.R-project.org/package=robustbase}{robustbase} and the
 references section below.
 }
 \references{
-Brys, G., M. Hubert, A. Struyf, 2004. A Robust Measure of Skewness. 
-  Journal of Computational and Graphical Statistics 13: 996-1017. 
+Brys, G., M. Hubert, A. Struyf, 2004.
+  A Robust Measure of Skewness.
+  Journal of Computational and Graphical Statistics 13: 996-1017.
   \doi{10.1198/106186004X12632}.
 }

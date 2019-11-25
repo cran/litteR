@@ -14,7 +14,7 @@ top(type, count, fraction = 0.8)
 \item{fraction}{fraction of most abundant types (numeric value in [0, 1])}
 }
 \value{
-Fraction of most abundant litter types in descending order 
+Fraction of most abundant litter types in descending order
         (numeric vector of length 1).
 }
 \description{

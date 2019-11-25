@@ -8,7 +8,7 @@ test_that("Tukeys trimean is correct", {
 test_that("Mann Kendall is correct", {
     x <- c(12, 8, 9, 4, 7, 5, 3, 1)
     mk <- mann_kendall(x, type = "decreasing")
-    ct <- cor.test(1:length(x), x, alternative = "less", method = "kendall")
+    ct <- cor.test(seq_along(x), x, alternative = "less", method = "kendall")
     expect_equivalent(test_statistic(mk), ct$estimate)
     expect_equal(p_value(mk), ct$p.value)
 })
@@ -17,7 +17,7 @@ test_that("Mann Kendall is correct", {
 
 test_that("Theil-Sen is correct", {
     y <- c(12, 8, 9, 4, 7, 5, 3, 1)
-    x <- 1:length(y)
+    x <- seq_along(y)
     ts <- theil_sen(x, y)
     expect_equal(slope(ts), -1.5)
     expect_equal(intercept(ts), 13.5)

@@ -182,7 +182,7 @@ All input files are validated by **litteR**. The following validation rules appl
 1. all required columns (see above) should be available;
 1. the date format should be valid, _i.e._ YYYY-mm-dd (ISO 8601) for the Wide and Long formats or dd/mm/YYYY or YYYY-mm-dd (ISO 8601) for the OSPAR format;
 1. litter type names should adhere to the specifications given above;
-1. abundances need to be [natural numbers](https://en.wikipedia.org/wiki/Natural_number) (ISO 80000-2);
+1. abundances are [natural numbers](https://en.wikipedia.org/wiki/Natural_number) (ISO 80000-2);
 1. all records should be unique, duplicated records will be removed with a warning;
 1. all cells should be filled with the appropriate data type (numbers, text or dates).
 
@@ -387,7 +387,7 @@ path_package("litteR", "extdata", "litter-stats-meta.csv") %>%
 - Dates should comply with ISO 8601, _i.e._ YYYY-mm-dd (_e.g._, 2019-09-05). If you prepare your input data with MS-Excel, make sure that the dates in the exported CSV-file also comply with this format. You can check this with a text editor (like Notepad on MS-Windows).
 - After typing `litter()` in the RStudio-console, a file dialogue should appear. If that is not the case, the file dialogue is probably covered by RStudio (see the task manager or use ALT-TAB on MS-Windows to navigate to the hidden file dialogue).
 - **litteR** expects a period (.) as decimal separator (_e.g._, 8.5) and _not_ a comma (_e.g._, _not_ 8,5). In MS-Windows 7, this can be accomplished by means of the 'Region and Language' menu (_e.g._, by using the English (UK) setting). These settings are particularly important when using MS-Excel for data preparation. In cases **litteR** reports errors, you should check the file format exported by MS-Excel in a text editor (_e.g._, Notepad).
-
+- When **litteR** complains about an `invalid multibyte string`, there is a character in your input file that is not part of the English alphabet. Substituting this character by a valid character in the range A-Z or a-z usually solves this problem.
 
 # References
 
