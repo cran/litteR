@@ -111,7 +111,7 @@ enumerate <- function(x, ...) {
 #' @export
 enumerate.character <- function(x, ...) {
     n <- length(x)
-    if (n == 1L) {
+    if (n <= 1L) {
         return(x)
     }
     if (n == 2L) {

@@ -100,7 +100,7 @@ test_that("litter readers handle NA properly", {
             read_csv %>%
             mutate("Plastic: Bags [2]" = NA_integer_) %>%
             litteR:::validate.ospar(),
-        "do not contain natural numbers"
+        "Non-natural numbers"
     )
     expect_warning(
         path_package("litteR", "extdata",
@@ -108,7 +108,7 @@ test_that("litter readers handle NA properly", {
             read_csv %>%
             mutate(abundance = NA_integer_) %>%
             litteR:::validate.long(),
-        "do not contain natural numbers"
+        "The following records do not contain natural numbers"
     )
 })
 

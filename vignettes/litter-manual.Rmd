@@ -175,7 +175,7 @@ for instance, 'Plastic: Bags [2]'.
 Optionally, other columns may be added as metadata. However, these columns will be ignored by **litteR**.
 
 
-### Quality Control
+### Data Quality Control
 
 All input files are validated by **litteR**. The following validation rules apply:
 
@@ -185,7 +185,7 @@ All input files are validated by **litteR**. The following validation rules appl
 1. abundances are [natural numbers](https://en.wikipedia.org/wiki/Natural_number) (ISO 80000-2);
 1. all records should be unique, duplicated records will be removed with a warning;
 1. all cells should be filled with the appropriate data type (numbers, text or dates).
-
+1. the data file should be a comma-separated values file (CSV), _i.e._, a text file where the columns are separated by commas (,) and not by spaces, semicolons (;) or tabs.
 
 
 

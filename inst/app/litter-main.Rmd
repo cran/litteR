@@ -353,7 +353,7 @@ This report can best be viewed with the latest versions of web browsers like Goo
 In this section, litter data will be read and validated. Warnings will be printed if they occur.
 
 
-```{r}
+```{r, results='hide'}
 # read and validate input file
 d_all <- INPUT_FILE_NAME %>%
   read_litter %>%
@@ -436,6 +436,7 @@ all(specified_codes %in% available_codes_data_file) || stop(sprintf(str_c(
       sQuote,
     specified_codes %>%
       setdiff(available_codes_data_file) %>%
+      str_sort(numeric = TRUE) %>%
       enumerate,
     call. = FALSE
 ))
@@ -457,8 +458,10 @@ all(specified_groups %in% available_groups_group_file) || stop(sprintf(str_c(
 
 # check if all type codes in data file are also in group file
 all(available_codes_data_file %in% available_codes_group_file) || stop(sprintf(str_c(
-    "The following types in data file %s are missing in group file %s:\n%s\n",
-    "Please add these types to the group file and indicate the groups they belong to."),
+    "The following types in data file %s are missing or\n",
+    "not assigned to groups in group file %s:\n%s\n",
+    "Please add these types to the group file and ",
+    "mark the groups they belong to with an 'x'."),
     INPUT_FILE_NAME %>%
       path_file %>%
       sQuote,
@@ -467,6 +470,7 @@ all(available_codes_data_file %in% available_codes_group_file) || stop(sprintf(s
       sQuote,
     available_codes_data_file %>%
       setdiff(available_codes_group_file) %>%
+      str_sort(numeric = TRUE) %>%
       enumerate,
     call. = FALSE
 ))
@@ -483,6 +487,7 @@ if (!all(available_codes_group_file %in% available_codes_data_file)) {
       sQuote,
     available_codes_group_file %>%
       setdiff(available_codes_data_file) %>%
+      str_sort(numeric = TRUE) %>%
       enumerate,
     call. = FALSE
   )) 

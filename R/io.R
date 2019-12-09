@@ -206,10 +206,10 @@ validate.ospar <- function(x, ...) {
         names
     if (length(no_natural_number) != 0L) {
         warning(
-            "The following column(s) do not contain natural numbers ",
-            "({0, 1, 2, ...}, ISO 80000-2):\n",
+            "Non-natural numbers (i.e., numbers that are not in 0, 1, 2, ...) ",
+            "found in columns:\n",
             toString(sQuote(no_natural_number)),
-            "\nThese will be excluded from analysis.",
+            "\nThese columns will be excluded from analysis.",
             call. = FALSE
         )
     }
@@ -322,7 +322,7 @@ validate.long <- function(x, ...) {
     if (any(no_natural_number)) {
         warning(
             "The following records do not contain natural numbers ",
-            "({0, 1, 2, ...}, ISO 80000-2) for column abundance:\n",
+            "({0, 1, 2, ...}, ISO 80000-2) for column 'abundance':\n",
             toString(sequenize(which(no_natural_number))),
             "\nThese will be excluded from analysis.",
             call. = FALSE
@@ -414,10 +414,10 @@ validate.wide <- function(x, ...) {
         names
     if (length(no_natural_number) != 0L) {
         warning(
-            "The following column(s) do not contain natural numbers ",
-            "({0, 1, 2, ...}, ISO 80000-2):\n",
+            "Non-natural numbers (i.e., numbers that are not in 0, 1, 2, ...) ",
+            "found in columns:\n",
             toString(sQuote(no_natural_number)),
-            "\nThese will be excluded from analysis.",
+            "\nThese columns will be excluded from analysis.",
             call. = FALSE
         )
     }
@@ -493,8 +493,8 @@ validate.wide <- function(x, ...) {
 read_litter <- function(file) {
 
     # check if file exists
-    (!file_exists(file)) && stop("file ", sQuote(file),
-                                 " not found.", call. = FALSE)
+    (!file_exists(file)) &&
+        stop("file ", sQuote(file), " not found.", call. = FALSE)
 
     # check if 'file' is a genuine CSV-file with sufficient columns
     n <- file %>%
@@ -507,8 +507,6 @@ read_litter <- function(file) {
             sprintf(sQuote(path_file(file))),
         call. = FALSE
     )
-
-
 
     # read file
     d <- suppressMessages(read_csv(file, guess_max = 1000000))
@@ -579,13 +577,14 @@ validate.litter_group <- function(x, ...) {
 
     # check required fields
     required_field_names <- c("TYPE_NAME", "TA")
-    missing_field_names <- required_field_names %>% setdiff(names(x))
+    missing_field_names <- required_field_names %>%
+        setdiff(names(x))
     n_missing_field_names <- length(missing_field_names)
     (n_missing_field_names == 1L) && stop(
         "Column ",  sQuote(missing_field_names),
         " is missing", call. = FALSE)
     (n_missing_field_names  > 1L) && stop(
-        "Columns ", sQuote(missing_field_names),
+        "Columns ", enumerate(sQuote(missing_field_names)),
         " are missing", call. = FALSE)
     x <- x %>%
         rename(type_name = "TYPE_NAME")
@@ -598,7 +597,7 @@ validate.litter_group <- function(x, ...) {
         })
 
     any(!entry_ok) && stop(
-        "In the litter group file only the character 'x' is allowed as ",
+        "In the litter group file, only character 'x' is allowed as ",
         "indicator\nThis is not true for columns: ",
         toString(sQuote(names(entry_ok)[!entry_ok])), call. = FALSE)
 

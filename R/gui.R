@@ -11,7 +11,7 @@
 #'
 #' @importFrom tcltk tk_choose.files tk_choose.dir
 #' @importFrom rmarkdown render html_document
-#' @importFrom purrr "%>%" chuck flatten_chr map_chr
+#' @importFrom purrr "%>%" chuck pluck flatten_chr map_chr
 #' @importFrom readr read_lines
 #' @importFrom yaml yaml.load
 #' @importFrom rlang is_null is_na
@@ -61,6 +61,17 @@ litter <- function(file = NULL) {
         path(dir_output, .)
 
     # handle specified litter/group type(s)
+    (!any(c("litter_types", "litter_types_groups") %in% names(pars))) &&
+        stop(
+            "key 'litter_types_groups' (or 'litter_types') ", 
+            "is missing in file 'settings.yaml'",
+            call. = FALSE)
+    pars$litter_types <- pars %>% 
+        pluck("litter_types") %>%
+            c(pars %>% 
+                pluck("litter_types_groups")) %>%
+            unique
+    pars$litter_types_groups <- NULL
     pars$litter_types <- pars %>%
         chuck("litter_types") %>%
         str_to_upper %>%

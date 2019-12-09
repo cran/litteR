@@ -1,3 +1,15 @@
+# litteR 0.7.0 (2019-12-09)
+
+* added new litter types to OSPAR-groups file
+* from now on the line ending of the settings file (YAML) is CR/LF to facilitate 
+  MS-Windows users on poor text editors
+* changed 'litter_types' to 'litter_types_groups' in settings file
+  both are currently valid for backward compatibility.
+* refinement of some warning and error messages
+* minor improvements of the documentation
+
+
+
 # litteR 0.6.6 (2019-11-25)
 
 * added wax and 'other polutants' to 'ospar-groups.csv'
@@ -7,7 +19,8 @@
 
 # litteR 0.6.5 (2019-10-22)
 
-* added a section to the manual on how to load (attach) litteR for users less familiar with R.
+* added a section to the manual on how to load (attach) litteR for users less 
+  familiar with R.
 
 
 # litteR 0.6.4 (2019-10-16)

@@ -6,8 +6,8 @@ analyst_name: "RWS"
 # Which modules to run (false or true)
 module_stats: true
 module_trend: true
-module_baseline: true
-module_power: true
+module_baseline: false
+module_power: false
 
 # Period to analyse (YYYY-mm-dd)
 min_date: 2012-01-01
@@ -19,9 +19,9 @@ percentage_total_abundance: 80
 # name of group file (see package vignette for more details)
 file_groups: ospar-groups.csv
 
-# Litter type(s) to analyse 
+# Litter type(s) and/or groups to analyse 
 # (e.g., OSPAR codes in square brackets and [TA] for total abundance)
-litter_types: [[TA], [49]]
+litter_types_groups: [[TA], [49]]
 
 # Image quality: high or low
 image_quality: high

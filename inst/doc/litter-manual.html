@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -13,7 +12,7 @@
 
 <meta name="author" content="Dennis Walvoort Wageningen Environmental Research, The Netherlands Willem van Loon  Rijkswaterstaat, The Netherlands" />
 
-<meta name="date" content="2019-11-25" />
+<meta name="date" content="2019-12-09" />
 
 <title>litteR User Manual</title>
 
@@ -227,7 +226,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">litteR User Manual</h1>
 <h4 class="author">Dennis Walvoort <font size="1">Wageningen Environmental Research, The Netherlands</font><br>Willem van Loon <font size="1"> Rijkswaterstaat, The Netherlands</font></h4>
-<h4 class="date">2019-11-25</h4>
+<h4 class="date">2019-12-09</h4>
 
 
 <div id="TOC">
@@ -243,7 +242,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="#wide-format"><span class="toc-section-number">4.1.1</span> Wide format</a></li>
 <li><a href="#long-format"><span class="toc-section-number">4.1.2</span> Long format</a></li>
 <li><a href="#ospar_format"><span class="toc-section-number">4.1.3</span> OSPAR format</a></li>
-<li><a href="#quality-control"><span class="toc-section-number">4.1.4</span> Quality Control</a></li>
+<li><a href="#data-quality-control"><span class="toc-section-number">4.1.4</span> Data Quality Control</a></li>
 </ul></li>
 <li><a href="#settings"><span class="toc-section-number">4.2</span> Settings file</a></li>
 <li><a href="#groups-file"><span class="toc-section-number">4.3</span> Groups file</a></li>
@@ -251,7 +250,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="#output"><span class="toc-section-number">5</span> Output</a><ul>
 <li><a href="#report"><span class="toc-section-number">5.1</span> Report</a><ul>
 <li><a href="#settings-1"><span class="toc-section-number">5.1.1</span> Settings</a></li>
-<li><a href="#data-quality-control"><span class="toc-section-number">5.1.2</span> Data Quality Control</a></li>
+<li><a href="#data-quality-control-1"><span class="toc-section-number">5.1.2</span> Data Quality Control</a></li>
 <li><a href="#descriptive-statistics"><span class="toc-section-number">5.1.3</span> Descriptive statistics</a></li>
 <li><a href="#trend-analysis"><span class="toc-section-number">5.1.4</span> Trend analysis</a></li>
 <li><a href="#baseline-analysis"><span class="toc-section-number">5.1.5</span> Baseline analysis</a></li>
@@ -266,7 +265,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p><strong>litteR</strong> is a modular tool for analyzing litter data (<em>e.g.</em>, beach litter). The current version (0.6.6) contains the following modules:</p>
+<p><strong>litteR</strong> is a modular tool for analyzing litter data (<em>e.g.</em>, beach litter). The current version (0.7.0) contains the following modules:</p>
 <ul>
 <li>module stats: descriptive statistics;</li>
 <li>module trend: non-parametric trend analysis of litter time-series;</li>
@@ -440,8 +439,8 @@ File open dialogue.
 <p>for instance, ‘Plastic: Bags [2]’.</p>
 <p>Optionally, other columns may be added as metadata. However, these columns will be ignored by <strong>litteR</strong>.</p>
 </div>
-<div id="quality-control" class="section level3">
-<h3><span class="header-section-number">4.1.4</span> Quality Control</h3>
+<div id="data-quality-control" class="section level3">
+<h3><span class="header-section-number">4.1.4</span> Data Quality Control</h3>
 <p>All input files are validated by <strong>litteR</strong>. The following validation rules apply:</p>
 <ol style="list-style-type: decimal">
 <li>all required columns (see above) should be available;</li>
@@ -450,6 +449,7 @@ File open dialogue.
 <li>abundances are <a href="https://en.wikipedia.org/wiki/Natural_number">natural numbers</a> (ISO 80000-2);</li>
 <li>all records should be unique, duplicated records will be removed with a warning;</li>
 <li>all cells should be filled with the appropriate data type (numbers, text or dates).</li>
+<li>the data file should be a comma-separated values file (CSV), <em>i.e.</em>, a text file where the columns are separated by commas (,) and not by spaces, semicolons (;) or tabs.</li>
 </ol>
 </div>
 </div>
@@ -464,8 +464,8 @@ analyst_name: &quot;RWS&quot;
 # Which modules to run (false or true)
 module_stats: true
 module_trend: true
-module_baseline: true
-module_power: true
+module_baseline: false
+module_power: false
 
 # Period to analyse (YYYY-mm-dd)
 min_date: 2012-01-01
@@ -477,9 +477,9 @@ percentage_total_abundance: 80
 # name of group file (see package vignette for more details)
 file_groups: ospar-groups.csv
 
-# Litter type(s) to analyse 
+# Litter type(s) and/or groups to analyse 
 # (e.g., OSPAR codes in square brackets and [TA] for total abundance)
-litter_types: [[TA], [49]]
+litter_types_groups: [[TA], [49]]
 
 # Image quality: high or low
 image_quality: high
@@ -620,10 +620,10 @@ text
 </tr>
 <tr>
 <td style="text-align:left;">
-litter_types
+litter_types_groups
 </td>
 <td style="text-align:left;width: 15em; ">
-litter type(s) to analyse
+litter type(s) and group(s) to analyse
 </td>
 <td style="text-align:left;width: 15em; ">
 litter/group code(s) in square brackets, e.g., [[49], [TA], [SUP]]
@@ -735,7 +735,7 @@ First 10 records of the litter-groups.csv file.
 <h3><span class="header-section-number">5.1.1</span> Settings</h3>
 <p>This section gives a summary of the settings/parameters in the settings file.</p>
 </div>
-<div id="data-quality-control" class="section level3">
+<div id="data-quality-control-1" class="section level3">
 <h3><span class="header-section-number">5.1.2</span> Data Quality Control</h3>
 <p>In this section (potential) problems in the input files are reported.</p>
 </div>
