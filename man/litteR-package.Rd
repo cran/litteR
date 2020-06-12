@@ -10,6 +10,11 @@ A tool for the analysis of various litter types, e.g.,
 beach litter, riverain litter, floating litter, and seafloor litter.
 }
 \details{
+\if{html}{\figure{litter.png}{options: width='900'}}
+\if{latex}{\figure{litter.png}{options: width=100mm}}
+\cr
+\cr
+
 The easiest way to get convenient with \pkg{litteR} is to create an empty
 project directory and fill it with example files by calling the function
 \code{\link{create_litter_project}}. The workhorse function in \pkg{litteR}

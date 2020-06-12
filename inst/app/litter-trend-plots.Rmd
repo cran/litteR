@@ -1,0 +1,63 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+logger$info("Creating time-series plots")
+```
+
+Time-series of the selected type names, group codes and and spatial codes are given in the plots below, including trend line and smoother.
+
+The lines and dots have the following meaning:
+
+- dots: observations;
+- thin gray line segments: auxiliary line segments to guide the eye (only given for 5 to 24 points);
+- blue line: [loess-smoother](https://en.wikipedia.org/wiki/Local_regression). It is only given for 25 or more points;
+- red line: Theil-Sen trend line (its slope is given in the table above). It is only given for 5 or more points.
+
+
+```{r fig.width=5, fig.height=3, out.width=449}
+d_ltr %>%
+    filter(type_name %in% unique(c("TC", TYPE_NAME, GROUP_CODE))) %>%
+    filter(spatial_code %in% SPATIAL_CODE) %>%
+    left_join(
+      d_stats %>%
+        select(spatial_code, type_name, b0, b1), 
+      by = c("spatial_code", "type_name")) %>%
+    group_by(spatial_code, type_name) %>%
+    group_split() %>%
+    map_df(function(x) {
+        g <- ggplot(data = x, mapping = aes(x = date, y = count)) +
+                geom_point() +
+                scale_x_date(name = "", limits = c(DATE_FROM, DATE_TO)) +
+                ggtitle(str_c(x$spatial_code[1], x$type_name[1], sep = "  "))
+        if (nrow(x) >= 5L) {
+            if (nrow(x) <= 24L) {
+                g <- g +        
+                    geom_path(size = 0.5, colour = "gray")
+            }
+            d <- tibble(date = range(x$date)) %>%
+                mutate(count = x$b0[1] + x$b1[1] * as.numeric(date))
+            g <- g + 
+                geom_point() +
+                geom_path(
+                    data = d, 
+                    mapping = aes(x = date, y = count),
+                    colour = "red", size = 1.0)
+            if (nrow(x) >= 25L) {
+                g <- g +        
+                    geom_smooth(method = "loess", formula = y ~ x, se = FALSE,
+                                colour = "blue", size = 0.5)
+            }
+        }
+        tibble(
+            g = list(g), 
+            spatial_code = x$spatial_code[1], 
+            type_name = x$type_name[1])
+    }) %>%
+    arrange(spatial_code, type_name) %>%
+    pull("g") %>%
+    walk(print)
+```

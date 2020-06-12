@@ -1,0 +1,72 @@
+2020-06-02 14:18:29 [INFO] Starting a new litteR session
+2020-06-02 14:18:29 [INFO] litteR version: 0.8.0
+2020-06-02 14:18:29 [INFO] litteR release date: 2020-01-31
+2020-06-02 14:18:29 [INFO] Reading settings file ‘settings.yaml’
+2020-06-02 14:18:29 [INFO] Check optional settings...
+2020-06-02 14:18:29 [INFO] Check existence of required settings...
+2020-06-02 14:18:29 [INFO] All required settings are available
+2020-06-02 14:18:29 [INFO] Checking settings 'date_min' and 'date_max'
+2020-06-02 14:18:29 [INFO] Settings 'date_min' and 'date_max' are valid
+2020-06-02 14:18:29 [INFO] Checking setting 'percentage_total_count'
+2020-06-02 14:18:29 [INFO] Setting 'percentage_total_count' is valid
+2020-06-02 14:18:29 [INFO] Checking setting 'figure_quality'
+2020-06-02 14:18:29 [INFO] Setting 'figure_quality' is valid
+2020-06-02 14:18:29 [INFO] Settings file has been read
+2020-06-02 14:18:29 [INFO] Constructing filename for report
+2020-06-02 14:18:29 [INFO] Filename ‘litteR-results-20200602T141829.html’ created
+2020-06-02 14:18:29 [INFO] Construct filename for storing statistics
+2020-06-02 14:18:29 [INFO] Filename ‘litteR-results-20200602T141829.csv’ created
+2020-06-02 14:18:29 [INFO] Starting litter analysis
+2020-06-02 14:18:29 [INFO] Checking parameters in settings file
+2020-06-02 14:18:29 [INFO] Entering data quality control section
+2020-06-02 14:18:29 [INFO] Checking existence of '/home/dennis/test-litter/types-ospar.csv'
+2020-06-02 14:18:29 [INFO] '/home/dennis/test-litter/types-ospar.csv' exists
+2020-06-02 14:18:29 [INFO] Validating type file
+2020-06-02 14:18:29 [INFO] Checking optional columns in type file
+2020-06-02 14:18:29 [INFO] Optional column 'type_description' found
+2020-06-02 14:18:29 [INFO] Checking required columns in type file
+2020-06-02 14:18:29 [INFO] Required columns are available
+2020-06-02 14:18:29 [INFO] Checking type names for duplicates
+2020-06-02 14:18:29 [INFO] No duplicates found
+2020-06-02 14:18:29 [INFO] Checking if table cells are either empty or 'x'
+2020-06-02 14:18:29 [INFO] All table cells are OK
+2020-06-02 14:18:29 [INFO] Checking existence of '/home/dennis/test-litter/beach-litter-nl-2012-2017.csv'
+2020-06-02 14:18:29 [INFO] '/home/dennis/test-litter/beach-litter-nl-2012-2017.csv' exists
+2020-06-02 14:18:29 [INFO] Checking if CSV-file is comma delimited
+2020-06-02 14:18:29 [INFO] CSV-file is comma delimited
+2020-06-02 14:18:29 [INFO] Reading litter data file
+2020-06-02 14:18:29 [INFO] Check if required metadata columns 'spatial_code' and 'date' exist
+2020-06-02 14:18:29 [INFO] All required columns are available
+2020-06-02 14:18:29 [INFO] Checking date format
+2020-06-02 14:18:29 [INFO] All dates are ISO 8601 compliant (YYYY-mm-dd)
+2020-06-02 14:18:29 [INFO] Checking consistency of dates
+2020-06-02 14:18:29 [INFO] Dates are consistent. All dates are YYYY-mm-dd
+2020-06-02 14:18:29 [INFO] Check if all litter types in the type file are present in the data file
+2020-06-02 14:18:29 [WARN] The following types in the type file are missing in the data file: 'faeces: in_bags [121]'
+2020-06-02 14:18:29 [INFO] Select only litter data
+2020-06-02 14:18:29 [WARN] The following columns will be excluded from analysis:'region_name', 'country_code', 'country_name', 'location_code', 'location_name', 'survey: old_rope_small [200]', 'survey: old_rope_large [201]', 'survey: old_plastic_pieces [202]', 'survey: old_gloves [203]', 'survey: old_cartons [204]', 'survey: old_oildrums_new [205]', 'survey: old_oildrums_old [206]', 'survey: old_human_faeces [207]', 'survey: old_animal_faeces [208]', 'survey: old_cloth_rope [210]' and 'survey: pellets [998]'
+2020-06-02 14:18:29 [INFO] Check for empty cells
+2020-06-02 14:18:29 [INFO] No empty cells found
+2020-06-02 14:18:29 [INFO] Check that litter counts are numbers
+2020-06-02 14:18:29 [INFO] Only numbers found
+2020-06-02 14:18:29 [INFO] Check that litter counts are nonnegative numbers
+2020-06-02 14:18:29 [INFO] No negative numbers found
+2020-06-02 14:18:29 [INFO] Check that litter counts are natural numbers
+2020-06-02 14:18:29 [INFO] Only natural numbers found
+2020-06-02 14:18:29 [INFO] Check for duplicated records
+2020-06-02 14:18:30 [INFO] No duplicated records found
+2020-06-02 14:18:30 [INFO] No records with the same spatial_code/date found
+2020-06-02 14:18:30 [INFO] Computing group totals
+2020-06-02 14:18:30 [INFO] Determining top 80% litter...
+2020-06-02 14:18:30 [INFO] Entering outlier analysis section
+2020-06-02 14:18:30 [INFO] Entering descriptive statistics section
+2020-06-02 14:18:30 [INFO] Creating table with litter statistics
+2020-06-02 14:18:32 [INFO] Table with litter statistics created
+2020-06-02 14:18:32 [INFO] Entering trend analysis section
+2020-06-02 14:18:32 [INFO] Creating table with trend statistics
+2020-06-02 14:18:32 [INFO] Table with trend statistics created
+2020-06-02 14:18:32 [INFO] Creating time-series plots
+2020-06-02 14:18:34 [INFO] Adding session information.
+2020-06-02 14:18:34 [INFO] Report completed
+2020-06-02 14:18:34 [INFO] All results have been written to ‘/home/dennis/test-litter/litteR-results-20200602T141829’
+2020-06-02 14:18:34 [INFO] litteR session terminated

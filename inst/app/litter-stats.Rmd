@@ -1,152 +1,110 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+logger$info("Entering descriptive statistics section")
+```
+
 ## Descriptive statistics
 
-For each location and litter type, the following statistics will be estimated for the period `r str_c(DATE_FROM, DATE_TO, sep = " to ")`:
+For each spatial code and group/type name, the following statistics have been estimated for the period `r str_c(DATE_FROM, DATE_TO, sep = " to ")`:
 
--  mean abundance (mean):, _i.e._, [the arithmetic mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of the counts for each litter type;
-- median abundance (median), _i.e._, the [median](https://en.wikipedia.org/wiki/Median) of the counts for each litter type;
-- relative abundance (rel.abund.): the contribution of each litter type to the total abundance of litter types (%);
+- mean count (mean):, _i.e._, [the arithmetic mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of the counts for each litter type;
+- median count (median), _i.e._, the [median](https://en.wikipedia.org/wiki/Median) of the counts for each litter type;
+- relative count (%TC): the contribution of each litter type to the total count of litter types (%);
 - [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (CV): the ratio of the standard deviation to the mean of the counts for each litter type (%);
-- ratio of the [MAD](https://en.wikipedia.org/wiki/Median_absolute_deviation) and the [median](https://en.wikipedia.org/wiki/Median) (RMAD, %);
+- ratio of [MAD](https://en.wikipedia.org/wiki/Median_absolute_deviation) and [median](https://en.wikipedia.org/wiki/Median) (RMAD, %);
 - number of surveys (N);
+- [Theil-Sen slope](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) (slope): a robust non-parametric estimator of slope (litter counts / year);
+- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed [Mann-Kendall test](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) to test the null hypothesis of 
+    - no monotonically _increasing_ trend in case the Theil-Sen slope is greater than zero;
+    - no monotonically _decreasing_ trend in case the Theil-Sen slope is smaller than zero;
 
-These statistics will be estimated for types with the greatest abundances making up `r PERCENTAGE_TOTAL_ABUNDANCE`% of the total abundance for each location.
 
-> These statisics have been stored in file `r sQuote(basename(STATS_FILE_NAME))`.
+These statistics will be estimated for types with the greatest counts making up `r PERCENTAGE_TOTAL_COUNT`% of the total count for each location and for all groups specified in `r sQuote(path_file(FILE_TYPES))`.
+
+> These statistics have been stored in file `r sQuote(path_file(FILE_STATS))`.
 
 
 ```{r}
+logger$info("Creating table with litter statistics")
+d_stats <- d_ltr %>%
+    group_by(spatial_code, type_name, topx) %>%
+    summarise(
+        from = format(min(date)),
+        to = format(max(date)),
+        rel_count = mean(rel_count),
+        mean = mean(count),
+        median = median(count),
+        cv = cv(count),
+        rmad = rmad(count),
+        n = n(),
+        ts = list(theil_sen(date, count)),
+        b0 = ts %>%
+          first %>%
+          intercept,
+        b1 = ts %>%
+          first %>%
+          slope,
+        p_value = if_else(
+            are_na(b1),
+            NA_real_,
+            if_else(
+                b1 >  0,
+                p_value(mann_kendall(count, "increasing")),
+                p_value(mann_kendall(count, "decreasing"))
+            )
+        )) %>%
+    ungroup %>%
+    select(-ts)
 
-# aggregation to various spatial scales
+# store stats in a CSV-file
+d <- d_stats %>%
+    filter(topx | are_na(topx)) %>% # only top x% or groups
+    mutate(slope = b1 * 365.25) %>%
+    mutate_if(is_double, signif, digits = 3) %>%
+    select(spatial_code, from, to, type_name,
+           rel_count, mean, median, cv, rmad, n, slope, p_value) %>%
+    arrange(spatial_code, desc(rel_count)) %>%
+    rename(`%TC` = rel_count)
 
-d_assessment_location <- d_stats %>%
-    filter(topx | type_name == type_code) %>%
-    mutate(RMAD = rmad * 100, CV = cv * 100) %>%
-    select(country_code, region_name, location_name, type_name, from, to,
-           mean, median, `rel.abund.` = perc_abundance, CV, RMAD, N = n)
+d %>%
+    write_csv(FILE_STATS)
 
-d <- d_assessment_location %>%
-    select(-from, -to, -location_name)
-
-d_assessment_country_region <- d %>%
-    group_by(country_code, region_name, type_name) %>%
-    summarise_all(mean) %>%
-    ungroup
-
-show_country_region_level <- (d %>%
-    group_by(country_code, region_name) %>%
-    summarise(n = n()) %>%
-    nrow) > 1
-
-d_assessment_country <- d %>%
-    select(-region_name) %>%
-    group_by(country_code, type_name) %>%
-    summarise_all(mean) %>%
-    ungroup 
-
-d_assessment_regional <- d %>%
-    select(-country_code) %>%
-    group_by(region_name, type_name) %>%
-    summarise_all(mean) %>%
-    ungroup
+logger$info("Table with litter statistics created")
 ```
 
 
-Furthermore, these statistics are averaged for `r if_else(show_country_region_level, "four", "three")` spatial scales. These results are given below.
-
-
-### Location level
-
-#### Groups
+The statistics for the litter groups are given in the table below.
 
 ```{r}
-d_assessment_location %>%
-    select(-country_code, -region_name) %>%
-    filter(is_group_code(type_name)) %>%
-    arrange(desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "llllrrrrrr")
-```
-
-#### Types
-
-```{r}
-d_assessment_location %>%
-    select(-country_code, -region_name) %>%
-    filter(!is_group_code(type_name)) %>%
-    arrange(desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "llllrrrrrr")
+d %>%
+    filter(type_name == str_to_upper(type_name)) %>% # group codes
+    rename(group_code = type_name) %>%
+    mutate_if(is_double, formatC, format = "fg", digits = 4) %>%
+    kable()
 ```
 
 
-```{r eval=show_country_region_level, results='asis'}
-cat("### Country-regional level\n")
-cat("#### Groups\n")
-```
+The figures below show for each spatial code the median count for each group.
 
-```{r eval=show_country_region_level}
-d_assessment_country_region %>%
-    filter(is_group_code(type_name)) %>%
-    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "lllrrrrrr")
-```
-
-```{r eval=show_country_region_level, results='asis'}
-cat("#### Types\n")
-```
-
-```{r eval=show_country_region_level}
-d_assessment_country_region %>%
-    filter(!is_group_code(type_name)) %>%
-    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "lllrrrrrr")
-```
-
-
-### Country level
-
-#### Groups
-
-```{r}
-d_assessment_country %>%
-    filter(is_group_code(type_name)) %>%
-    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "llrrrrrr")
-```
-
-#### Types
-
-```{r}
-d_assessment_country %>%
-    filter(!is_group_code(type_name)) %>%
-    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "llrrrrrr")
-```
-
-
-### Regional level
-
-#### Groups
-
-```{r message=FALSE}
-d_assessment_regional %>%
-    filter(is_group_code(type_name)) %>%
-    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "llrrrrrr")
-```
-
-
-#### Types
-
-```{r message=FALSE}
-d_assessment_regional %>%
-    filter(!is_group_code(type_name)) %>%
-    arrange(desc(is_group_code(type_name)), desc(`rel.abund.`)) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 3) %>%
-    kable(align = "llrrrrrr")
+```{r fig.width=5, fig.height=5, out.width=449}
+d_stats %>%
+  select(spatial_code, type_name, median) %>%
+  filter(type_name == str_to_upper(type_name)) %>% # group codes
+  arrange(spatial_code, median) %>%
+  split(.$spatial_code) %>%
+  walk(function(x) {
+      x$type_name <- factor(x$type_name, levels = x$type_name, ordered = TRUE)
+      g <- ggplot(data = x) +
+        geom_col(mapping = aes(x = type_name, y = median), fill = "blue", alpha = 0.5) +
+        scale_x_discrete(name = "") +
+        scale_y_continuous(name = "median count") +
+        coord_flip() +
+        ggtitle(x$spatial_code[1])
+      print(g)
+  })
 ```

@@ -4,16 +4,20 @@
 \alias{read_litter}
 \title{Read Litter Data}
 \usage{
-read_litter(file)
+read_litter(filename, logger = create_logger(level = "INFO"), type_names)
 }
 \arguments{
-\item{file}{name of litter file}
+\item{filename}{name of litter file}
+
+\item{logger}{optional logger object (see \code{\link{create_logger}})}
+
+\item{type_names}{character vector of allowed type_names}
 }
 \value{
 \code{tibble} with litter data in long format
 }
 \description{
 Reads litter data from various formats. Currently only the
-OSPAR data snapshot format, a long format, and a wide format
+OSPAR data snapshot format, and a wide format
 are supported. See the package vignette for more details.
 }

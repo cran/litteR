@@ -4,123 +4,121 @@
 #' A Tcl/Tk-dialogue will be started if one or more arguments
 #' are missing.
 #'
-#' @param file file containing litter data (see vignette for details)
+#' @param filename name of file containing settings (see vignette for details)
+#'
+#' @details For details, see our vignette by typing: vignette("litter-manual")
 #'
 #' @return An HTML-document in which all the litter analysis results
-#' (tables, figures, explanotory text) are reported.
+#' (tables, figures, explanatory text) are reported.
 #'
 #' @importFrom tcltk tk_choose.files tk_choose.dir
 #' @importFrom rmarkdown render html_document
 #' @importFrom purrr "%>%" chuck pluck flatten_chr map_chr
 #' @importFrom readr read_lines
-#' @importFrom yaml yaml.load
 #' @importFrom rlang is_null is_na
-#' @importFrom stringr str_c str_sub str_to_upper
-#' @importFrom fs path path_norm path_package file_temp dir_copy path_dir
+#' @importFrom stringr str_c str_sub str_subset str_to_upper str_glue
+#' @importFrom fs path path_norm path_package path_dir path_ext path_ext_set dir_create
+#'   file_temp dir_copy file_copy
 #'
 #' @export
-litter <- function(file = NULL) {
+litter <- function(filename = NULL) {
 
-    # check if Tcl/Tk is available
-    if (is_null(file)) {
+    # read settings file
+    if (is_null(filename)) {
         if (!capabilities("tcltk")) {
             stop(
                 "The 'tcltk'-package is not supported on this machine.\n",
-                "Please provide a valid filename as function argument\n",
+                "Please provide a valid filename as function argument.",
                 call. = FALSE
             )
         }
         message("Note: A file dialogue should appear right now.\n",
                 "If not, it is likely to be hidden behind other programs.")
-        file <- tk_choose.files(
+        filename <- tk_choose.files(
             default = "",
-            caption = "Select input file",
+            caption = "Select settings file",
             multi = FALSE,
-            filters = matrix(data = c("input file", ".csv"), nrow = 1)
+            filters = matrix(data = c("settings file", ".yaml"), nrow = 1)
         )
-        if (length(file) == 0L) {
-            message("Selection of the input file has been cancelled.")
+        if (length(filename) == 0L) {
+            message("Selection of the settings file has been cancelled.")
             return(invisible(NULL))
+        }
+    } else {
+        extension <- filename %>%
+            path_ext %>%
+            str_to_lower
+        if (extension != "yaml") {
+            stop(
+                "file should have yaml as extension",
+                call. = FALSE
+            )
         }
     }
 
-    # extract work directory
-    dir_output <- file %>%
+    # create output directory
+    timestamp <- Sys.time() %>%
+        format("%Y%m%dT%H%M%S")
+    dir_input <- filename %>%
         path_dir
+    dir_output <- dir_input %>%
+        path(str_glue("litteR-results-{timestamp}")) %>%
+        dir_create
+
+    # create, initialize, and finalize logger
+    con <- dir_output %>%
+        path(str_glue("litteR-log-{timestamp}.log")) %>%
+        file(open = "wt")
+    logger <- create_logger(con)
+    logger$info("Starting a new litteR session")
+    logger$info(str_glue("litteR version: {packageVersion('litteR')}"))
+    logger$info(str_glue("litteR release date: {packageDate('litteR')}"))
+    on.exit(setwd(dir_output), add = TRUE)
+    on.exit(logger$info("litteR session terminated"), add = TRUE)
+    on.exit(close(con), add = TRUE)
 
     # read settings
-    pars <- dir_output %>%
-        path("settings.yaml") %>%
-        read_lines %>%
-        yaml.load %>%
-        c(file_input = path_norm(file))
+    logger$info(str_glue("Reading settings file {sQuote(path_file(filename))}")) 
+    pars <- filename %>%
+        read_settings(logger) %>%
+        c(file_settings = path_norm(filename))
+    logger$info(str_glue("Settings file has been read"))
+    
+    # add path to data file
+    pars$file_data <- pars %>%
+        chuck("file_data") %>%
+        path(dir_input, .)
+    if (!file_exists(pars$file_data)) {
+        logger$error(str_glue("Data file {sQuote(pars %>% chuck('file_data'))} not found"))
+    }
 
-    # add path to groups file
-    pars$file_groups <- pars %>%
-        chuck("file_groups") %>%
-        path(dir_output, .)
+    # add path to type file
+    pars$file_types <- pars %>%
+        chuck("file_types") %>%
+        path(dir_input, .)
+    if (!file_exists(pars$file_data)) {
+        logger$error(str_glue("Type file {sQuote(pars %>% chuck('file_types'))} not found"))
+    }
 
-    # handle specified litter/group type(s)
-    (!any(c("litter_types", "litter_types_groups") %in% names(pars))) &&
-        stop(
-            "key 'litter_types_groups' (or 'litter_types') ", 
-            "is missing in file 'settings.yaml'",
-            call. = FALSE)
-    pars$litter_types <- pars %>% 
-        pluck("litter_types") %>%
-            c(pars %>% 
-                pluck("litter_types_groups")) %>%
-            unique
-    pars$litter_types_groups <- NULL
-    pars$litter_types <- pars %>%
-        chuck("litter_types") %>%
-        str_to_upper %>%
-        map_chr(function(x) {
-            if_else(
-                is_type_code(x) | is_group_code(x),
-                x,
-                str_c("[", x, "]")
-            )
-        })
-
-    # concatenate first character of selected modules
-    selected_modules <- c("stats", "trend", "baseline", "power") %>%
-        map_chr(function(x) {
-            ret <- ""
-            if (pars %>% chuck(str_c("module_", x))) {
-                ret <- x %>%
-                    str_sub(1, 1) %>%
-                    str_to_upper
-            }
-            ret
-        }) %>%
-        str_c(collapse = "")
-
-    # construct filename report
-    file_report <- path(
-        dir_output,
-        "litter-report-%s-%s-%s.html" %>%
-            sprintf(
-                pars %>%
-                    chuck("litter_types") %>%
-                    str_c(collapse = ""),
-                selected_modules %>%
-                    str_c(collapse = ""),
-                format(Sys.time(), "%Y%m%d-%H%M%S")))
-
-    # construct filename statistics
-    pars$file_stats <- file_report %>%
-        str_replace("report", "stats") %>%
-        str_replace("html$", "csv")
+    logger$info("Constructing filename for report")
+    file_report <- dir_output %>%
+        path(str_glue("litteR-results-{timestamp}.html"))
+    logger$info(str_glue("Filename {sQuote(path_file(file_report))} created"))
+    
+    # construct filename for statistics
+    logger$info("Construct filename for storing statistics")
+    pars$file_stats <- dir_output %>%
+        path(sprintf("litteR-results-%s.csv", timestamp))
+    logger$info(str_glue("Filename {sQuote(path_file(pars$file_stats))} created"))
 
     # create HTML report
+    logger$info("Starting litter analysis")
     temp_dir <- file_temp("litteR-")
     path_package("litteR", "app") %>%
         dir_copy(temp_dir)
-    owd <- setwd(temp_dir)
-    on.exit(setwd(owd))
+    setwd(temp_dir)
     message("litteR is currently processing your data. ",
-            "This may take several minutes...")
+            "This may take a few minutes...")
     render(
         input = "litter-main.Rmd",
         output_format = html_document(
@@ -130,8 +128,16 @@ litter <- function(file = NULL) {
         output_file = file_report,
         params = pars,
         quiet = TRUE)
-    message("Finished! All results have been written to:\n",
-            sQuote(dir_output))
+    logger$info("Report completed")
+    pars$file_data %>% 
+        file_copy(dir_output)
+    pars$file_types %>% 
+        file_copy(dir_output)
+    pars$file_settings %>% 
+        file_copy(dir_output)
+    logger$info(str_glue("All results have been written to {sQuote(dir_output)}"))
+    message(str_glue("Finished! All results have been written to {sQuote(dir_output)}"))
+    message(str_glue("See also 'litteR-log-{timestamp}.log' for detailed runtime information."))
 }
 
 
@@ -189,7 +195,7 @@ create_litter_project <- function(path = NULL) {
 
     # populate project directory with example files
     path_package("litteR", "extdata") %>%
-        dir_ls(regexp = "litter-stats-meta", invert = TRUE) %>%
+        dir_ls %>%
         file_copy(path)
     message("Project directory ", sQuote(path), " created")
 }

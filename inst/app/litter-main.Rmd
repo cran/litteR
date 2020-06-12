@@ -1,9 +1,7 @@
 ---
 title:  | 
-        | <font color="blue"> LitteR - Analysis of Litter Data</font>
-        | <font size="1"><i> &copy; 2018-2019 D.J.J. Walvoort & W.M.G.M Van Loon. [MIT-license](https://opensource.org/licenses/MIT). `r sprintf("litteR version: %s (%s)", packageVersion("litteR"), packageDate("litteR"))`</i></font>
-author: |
-        | Dennis Walvoort (<font size="1">WENR-WUR, The Netherlands</font>) Willem van Loon (<font size="1">RWS, The Netherlands</font>)
+        | <font color="blue"> litteR - Analysis of Litter Data</font>
+        | <font size="1"><i> &copy; 2018-2020 D.J.J. Walvoort & W.M.G.M Van Loon. [MIT-license](https://opensource.org/licenses/MIT). `r sprintf("litteR version: %s (%s)", packageVersion("litteR"), packageDate("litteR"))`</i></font>
 date:   | 
         | `r format(Sys.time())`
         | 
@@ -17,51 +15,35 @@ output:
 editor_options: 
   chunk_output_type: console
 params:
-  analyst_name:
-    label: "Your name:"
-    value: "not specified"
-    placeholder: "Enter your name"
-    input: text
   file_stats:
     label: "Name report:"
     value: ""
     placeholder: "Enter name of stats output file"
     input: file
-  file_input: 
+  file_data: 
     label: "Input file:"
     value: ""
     placeholder: "Enter name of litter file"
     input: file
-  file_groups: 
-    label: "Group file:"
+  file_settings: 
+    label: "Settings file:"
     value: ""
-    placeholder: "Enter name of file with group definitions"
+    placeholder: "Enter name of settings file"
     input: file
-  module_stats:
-    label: "Descriptive statistics"
-    value: TRUE
-    input: checkbox
-  module_trend:
-    label: "Trend analysis"
-    value: TRUE
-    input: checkbox
-  module_baseline:
-    label: "Baseline analysis"
-    value: TRUE
-    input: checkbox
-  module_power:
-    label: "Power analysis"
-    value: FALSE
-    input: checkbox
-  percentage_total_abundance: 
-    label: "Percentage of total abundance:"
+  file_types: 
+    label: "Type file:"
+    value: ""
+    placeholder: "Enter name of file with type and group definitions"
+    input: file
+  percentage_total_count: 
+    label: "Percentage of total count:"
     value: 80
     min: 50
     max: 100 
     step: 1
     width: 200
     input: numeric
-  min_date:
+  date_min:
     label: "First date to analyse"
     value: "2011-01-01"
     startview: year
@@ -70,7 +52,7 @@ params:
     format: "yyyy-mm-dd"
     width: 200
     input: date
-  max_date:
+  date_max:
     label: "Final date to analyse"
     value: "2017-12-31"
     startview: year
@@ -79,57 +61,31 @@ params:
     format: "yyyy-mm-dd"
     width: 200
     input: date
-  number_of_simulations: 
-    label: "Number of simulations:"
-    value: 100
-    min: 100
-    max: 10000
-    step: 100
-    width: 200
-    input: numeric
-  alpha: 
-    label: "significance level:"
-    value: 0.05
-    min: 0.001
-    max: 0.1
-    step: 0.001
-    width: 200
-    input: numeric
-  resolution_effect_size: 
-    label: "Resolution effect size:"
-    value: 10
-    min: 1
-    max: 50
-    step: 1
-    width: 200
-    input: numeric
-  min_surveys:
-    label: "Minimum number of surveys"
-    value: 24
-    min: 16
-    max: 100
-    step: 1
-    width: 200
-    input: numeric
-  litter_types:
-    label: Litter types
-    value: [[TA], [49]]
-    choices: ['[TA]', '[15]','[19]','[45]']
-    input: select
-    multiple: TRUE
-  show_source_code:
-    label: Show source code?
-    value: FALSE
-    input: checkbox
-  image_quality:
-    label: "image quality"
-    value: "high"
+  figure_quality:
+    label: "figure quality"
+    value: "low"
+    input: text
+  spatial_code:
+    label: "spatial code"
+    value: ""
+    input: text
+  group_code:
+    label: "group_code"
+    value: ""
+    input: text
+  type_name:
+    label: "type code"
+    value: ""
     input: text
 ---
 
 
 
-```{r include=FALSE, echo=params$show_source_code}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+# Coding convention
+# To make scripts readable and consistent, we adhere to the packages and 
+# programming style of the tidyverse (www.tidyverse.org)
+
 knitr::opts_knit$set(
   progress = FALSE, 
   verbose = FALSE
@@ -137,15 +93,6 @@ knitr::opts_knit$set(
 
 # make sure all table columns are visible
 options(dplyr.width = Inf, warning.length = 8000)
-```
-
-
-
-```{r, include=FALSE, message=FALSE, warning=FALSE, echo=params$show_source_code}
-
-# Coding convention
-# To make scripts readable and consistent, we adhere to the packages and 
-# programming style of the tidyverse (www.tidyverse.org)
 
 # attach packages to R's search path
 suppressPackageStartupMessages({
@@ -164,479 +111,200 @@ suppressPackageStartupMessages({
 
 
 
-```{r, echo=params$show_source_code}
-# image quality
-IMAGE_QUALITY <- params %>%
-  chuck("image_quality")
-permissible_image_quality <- c(low = 72, high = 300)
-if (!(IMAGE_QUALITY %in% names(permissible_image_quality))) {
-    warning(
-        "image quality should be set to either %s or %s" %>%
-            sprintf(
-                names(permissible_image_quality)[1], 
-                names(permissible_image_quality)[2]),
-        call. = FALSE)
-    message("Assuming publication quality")
-    IMAGE_QUALITY <- "publication"
-}
-
-# visibility of source code
-SHOW_SOURCE_CODE <- params %>%
-  pluck("show_source_code", .default = FALSE)
-```
-
-
 ```{r include=FALSE, purl=FALSE}
+# figure quality
+FIGURE_QUALITY <- params %>%
+  chuck("figure_quality")
+
 # global knitr-settings (defaults)
 opts_chunk$set(
-    echo = SHOW_SOURCE_CODE,
     comment = NULL,
-    dpi = c(low = 72, high = 300)[IMAGE_QUALITY]
+    echo = FALSE,
+    dpi = c(low = 72, high = 300)[FIGURE_QUALITY]
 )
 ```
 
 
-
-
-```{r, echo=FALSE}
-
-# analyst's name
-ANALYST_NAME <- params %>%
-  pluck("analyst_name", .default = "unknown")
+```{r}
+logger$info("Checking parameters in settings file")
 
 # files
-INPUT_FILE_NAME <- params %>%
-  chuck("file_input")
-GROUPS_FILE_NAME <- params %>%
-  chuck("file_groups")
-STATS_FILE_NAME <- params %>%
-  chuck("file_stats")
-META_FILE_NAME <- STATS_FILE_NAME %>%
-  str_replace("stats", "stats-meta")
+FILE_SETTINGS <- params %>%
+  pluck("file_settings", .default = "")
+FILE_DATA <- params %>%
+  pluck("file_data", .default = "")
+FILE_TYPES <- params %>%
+  pluck("file_types", .default = "")
+FILE_STATS <- params %>%
+  pluck("file_stats", .default = "")
 
-# tasks to perform
-MODULE_STATS <- params %>% 
-  pluck("module_stats", .default = FALSE)
-MODULE_TREND <- params %>% 
-  pluck("module_trend", .default = FALSE)
-MODULE_BASELINE <- params %>% 
-  pluck("module_baseline", .default = FALSE)
-MODULE_POWER <- params %>% 
-  pluck("module_power", .default = FALSE)
+# period to analyse
+DATE_FROM <- params %>%
+    chuck("date_min")
+DATE_TO <- params %>%
+    chuck("date_max")
 
-# period to analyse (DATE_FROM <= DATE_TO)
-DATE_FROM <- params$min_date %>% as.Date
-DATE_TO <- params$max_date %>% as.Date
+# percentage of total count
+PERCENTAGE_TOTAL_COUNT <- params %>%
+  chuck("percentage_total_count")
 
-# percentage of total abundance
-PERCENTAGE_TOTAL_ABUNDANCE <- params %>%
-  pluck("percentage_total_abundance", .default = 80)
+# spatial_code, type name, and group code
+SPATIAL_CODE <- params %>%
+  pluck("spatial_code")
+TYPE_NAME <- params %>%
+  pluck("type_name")
+GROUP_CODE <- params %>%
+  pluck("group_code")
 
-# litter types to analyse
-TYPE_CODES <- params %>% 
-  chuck("litter_types") %>%
-  map_chr(str_to_upper) %>%
-  unique
+if ((length(SPATIAL_CODE) == 1L) && (SPATIAL_CODE == "")) {
+    SPATIAL_CODE <- NULL
+}
+if ((length(TYPE_NAME) == 1L) && (TYPE_NAME == "")) {
+    TYPE_NAME <- NULL
+}
+if ((length(GROUP_CODE) == 1L) && (GROUP_CODE == "")) {
+    GROUP_CODE <- NULL
+}
 
-# significance level
-ALPHA <- params %>%
-  chuck("alpha")
-
-# number of Monte Carlo simulations
-N_SIM <- params %>%
-  chuck("number_of_simulations")
-
-# resolution of effect size power analysis
-RESOLUTION_EFFECT_SIZE <- params %>%
-  chuck("resolution_effect_size")
-
-# minimum number of surveys to sample from
-MIN_SURVEYS <- params %>%
-  chuck("min_surveys")
 ```
 
 
-```{r}
-# read and validate group file
-d_grp <- read_litter_groups(GROUPS_FILE_NAME)  %>%
-  mutate(group_name = str_c("[", group_name, "]"))
-```
+## Introduction
 
-
-### Introduction
-
-This tool performs the following types of data analysis on litter data, or any other type of litter data: data quality control, exploratory data analysis, trend analysis, baseline analysis and power analysis.
+This tool performs the following types of data analysis on beach litter data, or any other type of litter data: data quality control, outlier analysis, descriptive statistics, and trend analysis.
 
 This report can best be viewed with the latest versions of web browsers like Google Chrome, Mozilla Firefox, Chromium, or Safari. Its contents does not render well in some versions of Microsoft's Internet Explorer.
 
 
 
-### Settings
+## Settings
 
-- analyst: `r ANALYST_NAME`
-- files:
-    - project path: `r sQuote(path_dir(INPUT_FILE_NAME))`
-    - input file: `r sQuote(path_file(INPUT_FILE_NAME))`
-    - input file signature: `r sQuote(get_signature(path(INPUT_FILE_NAME)))`
-    - group file: `r sQuote(path_file(GROUPS_FILE_NAME))`
 - period: from `r DATE_FROM` to `r DATE_TO`
-- modules:
-    - descriptive statistics: `r str_to_lower(MODULE_STATS)`
-    - trend analysis: `r str_to_lower(MODULE_TREND)`
-    - baseline analysis: `r str_to_lower(MODULE_BASELINE)`
-    - power analysis: `r str_to_lower(MODULE_POWER)`
-- litter type(s): `r TYPE_CODES`
-- exploratory data analysis
-    - percentage of total abundance to analyse: `r PERCENTAGE_TOTAL_ABUNDANCE`%
-- power analysis
-    - significance level (&alpha;): `r ALPHA`
-    - number of Monte Carlo simulations: `r N_SIM`
-    - minimum surveys to sample from: `r MIN_SURVEYS`
-    - resolution of the effect size: `r RESOLUTION_EFFECT_SIZE`%
-- report
-    - image quality: `r sQuote(IMAGE_QUALITY)`
+- percentage of total count to analyse: `r PERCENTAGE_TOTAL_COUNT`%
+- files:
+    - project directory: `r sQuote(path_dir(FILE_DATA))`
+    - settings: `r sQuote(path_file(FILE_SETTINGS))`
+    - data: `r sQuote(path_file(FILE_DATA))`
+    - types: `r sQuote(path_file(FILE_TYPES))`
+- spatial codes: `r if (is_null(SPATIAL_CODE)) {"not specified"} else {enumerate(sQuote(SPATIAL_CODE))}`
+- group codes: `r if (is_null(GROUP_CODE)) {"not specified"} else {enumerate(sQuote(GROUP_CODE))}`
+- type names: `r if (is_null(TYPE_NAME)) {"not specified"} else {enumerate(sQuote(TYPE_NAME))}`
+- figure quality: `r sQuote(FIGURE_QUALITY)`
 
 
 
-
-
-
-```{r various checks, echo=FALSE, results='hide'}
-
-(INPUT_FILE_NAME == "") && stop(
-  "Litter file not specified",
-  call. = FALSE
-)
-
-!file_exists(INPUT_FILE_NAME) && stop(
-    sprintf("Litter file %s not found", sQuote(INPUT_FILE_NAME)),
-    call. = FALSE
-)
-
-(DATE_FROM > DATE_TO) && stop(
-    "first date '%s' is later than final date '%s'" %>%
-        sprintf(DATE_FROM, DATE_TO),
-    call. = FALSE
-)
-
-```
-
-```{r, eval=MODULE_POWER, results='hide'}
-((ALPHA < 0.001) | (ALPHA > 0.1)) && stop(
-    "ALPHA should be in the range from 0.001 to 0.1",
-    call. = FALSE
-)
-
-(!is.integer(N_SIM) || (N_SIM < 0)) && stop(
-    "N_SIM should be a positive integer",
-    call. = FALSE
-)
-
-((RESOLUTION_EFFECT_SIZE < 1) | (RESOLUTION_EFFECT_SIZE > 50)) && stop(
-    "Step effect size for power analysis should be in the range from 1 to 50%",
-    call. = FALSE
-)
-
-(!is.integer(MIN_SURVEYS) || (MIN_SURVEYS < 15)) && stop(
-    "MIN_SURVEYS should be a positive integer greater than or equal to 15",
-    call. = FALSE
-)
-
-```
 
 
 <br/>
 <br/>
 
-### Data Quality Control
+```{r}
+logger$info("Entering data quality control section")
+```
 
-In this section, litter data will be read and validated. Warnings will be printed if they occur.
+## Data Quality Control
+
+In this section, litter data will be read and validated. Warnings will be printed if they occur. See also the log-file for more details.
 
 
-```{r, results='hide'}
+```{r}
+# type_file
+d_type <- FILE_TYPES %>%
+  read_litter_types(logger)
+
 # read and validate input file
-d_all <- INPUT_FILE_NAME %>%
-  read_litter %>%
-  select(-country_name) %>%
+d_ltr <- FILE_DATA %>%
+  read_litter(logger, type_names = d_type %>% pull("type_name")) %>%
   filter(date %>% between(DATE_FROM, DATE_TO))
 
-(nrow(d_all) == 0) && stop(
-    "No data available between '%s' and '%s'.\nPlease check '%s' and '%s'." %>%
-        sprintf(DATE_FROM, DATE_TO, path_file(INPUT_FILE_NAME), "settings.yaml"),
-    call. = FALSE
-)
-
-```
-
-
-```{r}
-# add percentage and top-X indicator
-d_top <- d_all %>%
-    group_by(region_name, country_code, location_code, location_name, type_name) %>%
-    summarise(total_abundance_litter = sum(abundance)) %>%
-    mutate(total_abundance_location_name = sum(total_abundance_litter)) %>%
-    mutate(perc_abundance = 100 * total_abundance_litter / total_abundance_location_name) %>%
-    arrange(location_name, desc(perc_abundance)) %>%
-    mutate(
-        cum_perc = cumsum(perc_abundance), 
-        topx = cum_perc < (PERCENTAGE_TOTAL_ABUNDANCE + 0.001)) %>%
-    ungroup %>%
-    select(region_name, country_code, location_code, location_name, type_name, perc_abundance, topx)
-
-# add ranking
-d_top <- d_top %>%
-    group_by(region_name, country_code, location_code, location_name) %>%
-    mutate(ranking = rank(-perc_abundance, ties.method = "first")) %>%
-    ungroup %>%
-    arrange(region_name, country_code, location_code, location_name, ranking)
-```
-
-
-
-```{r results='hide'}
-
-# get user-specified codes in settings file
-specified_codes <- TYPE_CODES %>% 
-    get_type_code %>%
-    discard(are_na)
-
-# get user-specified codes in settings file
-specified_groups <- TYPE_CODES %>% 
-    get_group_code %>%
-    discard(are_na)
-
-# get available codes in data file
-available_codes_data_file <- d_all %>%
-    pull("type_name") %>%
-    get_type_code %>%
-    unique
-
-# get available groups in group file
-available_codes_group_file <- d_grp %>%
-    pull("type_name") %>%
-    get_type_code %>%
-    unique
-
-# get available groups in group file
-available_groups_group_file <- d_grp %>%
-    pull("group_name") %>%
-    unique
-
-# check if all type codes as specified in settings.yaml also occur in the data file
-all(specified_codes %in% available_codes_data_file) || stop(sprintf(str_c(
-    "The following type code(s) are specified as %s in file %s ",
-    "but missing in input file %s:\n%s"),
-    "litter_types" %>%
-      sQuote %>%
-      enumerate,
-    "settings.yaml" %>%
-      sQuote,
-    INPUT_FILE_NAME %>%
-      path_file %>%
-      sQuote,
-    specified_codes %>%
-      setdiff(available_codes_data_file) %>%
-      str_sort(numeric = TRUE) %>%
-      enumerate,
-    call. = FALSE
-))
-
-# check if all group codes as specified in settings.yaml also occur in the group file
-all(specified_groups %in% available_groups_group_file) || stop(sprintf(str_c(
-    "The following groups are specified in file %s ",
-    "but missing in group file %s:\n%s"),
-    "settings.yaml" %>%
-      sQuote,
-    GROUPS_FILE_NAME %>%
-      path_file %>%
-      sQuote,
-    specified_groups %>%
-      setdiff(available_groups_group_file) %>%
-      enumerate,
-    call. = FALSE
-))
-
-# check if all type codes in data file are also in group file
-all(available_codes_data_file %in% available_codes_group_file) || stop(sprintf(str_c(
-    "The following types in data file %s are missing or\n",
-    "not assigned to groups in group file %s:\n%s\n",
-    "Please add these types to the group file and ",
-    "mark the groups they belong to with an 'x'."),
-    INPUT_FILE_NAME %>%
-      path_file %>%
-      sQuote,
-    GROUPS_FILE_NAME %>%
-      path_file %>%
-      sQuote,
-    available_codes_data_file %>%
-      setdiff(available_codes_group_file) %>%
-      str_sort(numeric = TRUE) %>%
-      enumerate,
-    call. = FALSE
-))
-
-# check if all type codes in data file are also in group file
-if (!all(available_codes_group_file %in% available_codes_data_file)) {
-  warning(sprintf(
-    "The following types in group file %s are missing in data file %s:\n%s",
-    GROUPS_FILE_NAME %>%
-      path_file %>%
-      sQuote,
-    INPUT_FILE_NAME %>%
-      path_file %>%
-      sQuote,
-    available_codes_group_file %>%
-      setdiff(available_codes_data_file) %>%
-      str_sort(numeric = TRUE) %>%
-      enumerate,
-    call. = FALSE
-  )) 
+if ((nrow(d_ltr) == 0)) {
+  logger$error("No data available in the period settings between {DATE_FROM} and {DATE_TO}")
 }
-
 ```
 
 
 ```{r}
-# add litter groups to litter types
-d_all <- d_grp %>%
-  pull("group_name") %>%
+
+logger$info(str_glue("Computing group totals"))
+d_grp <- d_type %>%
+  pull("group_code") %>%
   unique %>%
   map_df(function(x) {
-    d_grp %>%
-      filter(group_name == x) %>%
-      left_join(d_all, by = "type_name") %>%
-      group_by(region_name, country_code, location_code, location_name, date) %>%
-      summarise(abundance = sum(abundance)) %>%
+    d_type %>%
+      filter(group_code == x) %>%
+      select(type_name) %>%
+      left_join(d_ltr, by = "type_name") %>%
+      group_by(spatial_code, date) %>%
+      summarise(count = sum(count)) %>%
       ungroup %>%
-      filter(!are_na(abundance)) %>%
-      mutate(type_name = x)
-  }) %>%
-  bind_rows(d_all)
+      filter(!are_na(count)) %>%
+      mutate(type_name = x)}) 
 
-# order by abundance
-d_all <- d_all %>% 
-    left_join(d_top, by = c("region_name", "country_code", "location_code", "location_name", "type_name")) %>%
-    mutate(
-      topx = topx %>% coalesce(FALSE),
-      ranking = ranking %>% coalesce(0L)) %>%
-    arrange(region_name, country_code, location_code, location_name, ranking, date)
+# computing relative group totals (relative w.r.t. TC)
+d_grp <- d_grp %>% 
+  filter(type_name == "TC") %>%
+  select(spatial_code, date, TC = count) %>%
+  right_join(d_grp, by = c("spatial_code", "date")) %>%
+  mutate(rel_count = 100 * count / TC) %>%
+  select(-TC)
 
-# add codes
-d_all <- d_all %>%
-    mutate(
-      type_code = get_type_code(type_name),
-      type_code = if_else(are_na(type_code), get_group_code(type_name), type_code))
-    
-```
+logger$info(str_glue("Determining top {PERCENTAGE_TOTAL_COUNT}% litter..."))
+d <- d_grp %>%
+  filter(type_name == "TC") %>%
+  select(spatial_code, date, TC = count) %>%
+  group_by(spatial_code) %>%
+  summarise(sum_TC = sum(TC)) %>%
+  left_join(d_ltr, by = "spatial_code") %>%
+  group_by(spatial_code, sum_TC, type_name) %>%
+  summarise(sum_count = sum(count)) %>%
+  arrange(spatial_code, desc(sum_count)) %>%
+  group_by(spatial_code) %>%
+  mutate(rel_count = 100 * cumsum(sum_count) / sum_TC) %>%
+  mutate(topx = rel_count < (PERCENTAGE_TOTAL_COUNT + 0.001)) %>%
+  ungroup %>%
+  select(spatial_code, type_name, topx)
 
+# adding relative counts to litter types
+d_ltr <- d_grp %>%
+  filter(type_name == "TC") %>%
+  select(spatial_code, date, TC = count) %>%
+  right_join(d_ltr, by = c("spatial_code", "date")) %>%
+  mutate(rel_count = 100 * count / TC) %>%
+  select(-TC) %>%
+  arrange(spatial_code, date, desc(rel_count)) 
 
-```{r}
-# Select type(s) of interest
-d_ltr <- d_all %>%
-    filter(type_code %in% TYPE_CODES)
-```
+# adding topx% to litter types
+d_ltr <- d_ltr %>%
+  left_join(d, by = c("spatial_code", "type_name"))
 
-```{r}
-d_stats <- d_all %>%
-    group_by(region_name, country_code, location_code, location_name, type_name, type_code) %>%
-    summarise(
-        from = format(min(date)),
-        to = format(max(date)),
-        mean = mean(abundance),
-        median = median(abundance),
-        cv = cv(abundance),
-        rmad = rmad(abundance),
-        n = n(),
-        ts = list(theil_sen(date, abundance)),
-        b0 = ts %>%
-          first %>%
-          intercept,
-        b1 = ts %>%
-          first %>%
-          slope,
-        p_value = if_else(
-            are_na(b1),
-            NA_real_,
-            if_else(
-                b1 >  0,
-                p_value(mann_kendall(abundance, "increasing")),
-                p_value(mann_kendall(abundance, "decreasing"))
-            )
-        ),
-        min = min(abundance),
-        p01 = quantile(abundance, 0.01),
-        p05 = quantile(abundance, 0.05),
-        p10 = quantile(abundance, 0.10),
-        p25 = quantile(abundance, 0.25),
-        p50 = quantile(abundance, 0.50),
-        p75 = quantile(abundance, 0.75),
-        p90 = quantile(abundance, 0.90),
-        p95 = quantile(abundance, 0.95),
-        p99 = quantile(abundance, 0.99),
-        max = max(abundance)
-        ) %>%
-    ungroup %>%
-    select(-ts) %>%
-    left_join(d_top, by = c("region_name", "country_code", "location_code", "location_name", "type_name")) 
+# adding litter types to litter groups
+d_ltr <- d_ltr %>%
+  bind_rows(d_grp)
 
-# add relative abundance to groups
-d_stats <- d_stats %>% 
-    split(., group_indices(., region_name, country_code, location_code, location_name)) %>%
-    map_df(function(x) {
-      ta <- x$mean[x$type_code == "[TA]"]
-      sel <- are_na(x$perc_abundance)
-      x$perc_abundance[sel] <- 100 * x$mean[sel] / ta
-      x
-    })
-
-
-# store stats in a CSV-file
-d_stats %>%
-    rename(intercept = b0, slope = b1, p_value_slope = p_value) %>%
-    mutate(slope = slope * 365.25) %>%
-    select(-perc_abundance, -topx, -ranking) %>%
-    mutate_if(is_double, function(x){if_else(is.nan(x), NA_real_, x)}) %>%
-    mutate_if(is_double, signif, digits = 3) %>%
-    write_csv(STATS_FILE_NAME, na = "")
-
-# store corresponding metadata
-path_package("litteR", "extdata", "litter-stats-meta.csv") %>%
-  read_csv(
-    col_types = cols(
-      column_name = col_character(),
-      description = col_character(),
-      unit = col_character()
-    )
-  ) %>%
-  write_csv(META_FILE_NAME, na = "")
 ```
 
 
 
+
 <br/>
 <br/>
-```{r, child=system.file("app", "litter-stats.Rmd", package = "litteR"), eval=MODULE_STATS}
+```{r, child=system.file("app", "litter-outlier.Rmd", package = "litteR")}
 ```
 
 <br/>
 <br/>
-```{r, child=system.file("app", "litter-trend.Rmd", package = "litteR"), eval=MODULE_TREND}
+```{r, child=system.file("app", "litter-stats.Rmd", package = "litteR")}
 ```
 
 <br/>
 <br/>
-```{r, child=system.file("app", "litter-baseline.Rmd", package = "litteR"), eval=MODULE_BASELINE}
-```
-
-<br/>
-<br/>
-```{r, child=system.file("app", "litter-power.Rmd", package = "litteR"), eval=MODULE_POWER}
+```{r, child=system.file("app", "litter-trend.Rmd", package = "litteR")}
 ```
 
 
 ## Session Information
 
 ```{r}
+logger$info("Adding session information.")
 sessionInfo()
 ```
-

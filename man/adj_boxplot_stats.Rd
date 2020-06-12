@@ -31,9 +31,15 @@ Vandervieren (2008, p.5191, Eq.5).
 \item \code{default}: Adjusted Boxplot Statistics
 }}
 
+\examples{
+adj_boxplot_stats(rlnorm(100))
+}
 \references{
 Hubert, M., and E. Vandervieren, 2008.
 An adjusted boxplot for skewed distributions.
 Computational Statistics and Data Analysis 52:5186-5201
 \doi{10.1016/j.csda.2007.11.008}
+}
+\seealso{
+\code{\link{stat_adj_boxplot}}
 }

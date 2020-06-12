@@ -4,7 +4,7 @@
 \alias{is_date_format}
 \title{Check Date Format}
 \usage{
-is_date_format(x, format)
+is_date_format(x, format = "\%Y-\%m-\%d")
 }
 \arguments{
 \item{x}{object of class \code{character} or \code{Date}}

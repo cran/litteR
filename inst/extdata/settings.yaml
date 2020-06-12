@@ -1,47 +1,20 @@
-### BASIC SETTINGS ###
-
-# Name of analyst
-analyst_name: "RWS"
-
-# Which modules to run (false or true)
-module_stats: true
-module_trend: true
-module_baseline: false
-module_power: false
+# litteR settings file
 
 # Period to analyse (YYYY-mm-dd)
-min_date: 2012-01-01
-max_date: 2017-12-31
+date_min: 2012-01-01
+date_max: 2017-12-31
 
-# Percentage of total abundance to analyse (0 < percentage_total_abundance <= 100)
-percentage_total_abundance: 80
+# Percentage of total count to analyse (0 < percentage_total_count <= 100)
+percentage_total_count: 80
 
-# name of group file (see package vignette for more details)
-file_groups: ospar-groups.csv
+# Data file. Note: the datafile must be in the same path as the settings file
+file_data: beach-litter-nl-2012-2017.csv
 
-# Litter type(s) and/or groups to analyse 
-# (e.g., OSPAR codes in square brackets and [TA] for total abundance)
-litter_types_groups: [[TA], [49]]
+# Type file. Defines the types and their groups
+file_types: types-ospar.csv
 
-# Image quality: high or low
-image_quality: high
-
-### ADVANCED SETTINGS ###
-
-# Power-analysis: number of Monte Carlo simulations
-# Note that larger values lead to longer run times.
-# The default number of simulations is 100 to speed up computation. 
-# However, 1000 simulations generally give more accurate results
-number_of_simulations: 100
-
-# Power-analysis: significance level
-alpha: 0.05
-
-# Power-analysis: resolution of effect size (range: 5% ... 50%)
-resolution_effect_size: 10
-
-# Power-analysis: minimum number of surveys to sample from
-min_surveys: 16
-
-# Show source code? (true or false)
-show_source_code: false
+# Select trend figures to plot in the report
+spatial_code: ["Noordwijk", "Terschelling"]
+group_code: ["TC", "SUP", "FISH"]
+type_name: ["Plastic: Bags [2]"]
+figure_quality: low

@@ -2,9 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{enumerate}
 \alias{enumerate}
+\alias{enumerate.numeric}
 \title{Enumerate Objects}
 \usage{
 enumerate(x, ...)
+
+\method{enumerate}{numeric}(x, ...)
 }
 \arguments{
 \item{x}{object to enumerate}
@@ -14,6 +17,11 @@ enumerate(x, ...)
 \description{
 Generic function for enumerating objects
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{numeric}: enumerate \code{numeric} vector.
+}}
+
 \seealso{
 \code{\link{enumerate.character}}
 }

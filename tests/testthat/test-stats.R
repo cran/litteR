@@ -31,8 +31,6 @@ test_that("Wilcoxon is correct", {
     wl <- wilcoxon(x, mu = 26, type = "less")
     wr <- wilcox.test(x, mu = 26, alternative = "less",
                       exact = length(x) == length(unique(x)))
-    expect_equal(power(wl, n = 10, alpha = 0.05, nsim = 100),
-                 0.655, tolerance = 1.0e-3)
     expect_equal(p_value(wl), wr$p.value)
     expect_equivalent(test_statistic(wl), wr$statistic)
 })

@@ -2,47 +2,44 @@
 % Please edit documentation in R/io.R
 \name{validate}
 \alias{validate}
-\alias{validate.ospar}
-\alias{validate.long}
-\alias{validate.wide}
-\alias{validate.litter_group}
-\title{Validation of Litter File Formats}
+\alias{validate.litter}
+\alias{validate.litter_types}
+\alias{validate.settings}
+\title{Validation of LitteR File Formats}
 \usage{
 validate(x, ...)
 
-\method{validate}{ospar}(x, ...)
+\method{validate}{litter}(x, type_names, logger = create_logger(level = "INFO"), ...)
 
-\method{validate}{long}(x, ...)
+\method{validate}{litter_types}(x, logger = create_logger(level = "INFO"), ...)
 
-\method{validate}{wide}(x, ...)
-
-\method{validate}{litter_group}(x, ...)
+\method{validate}{settings}(x, logger = create_logger(level = "INFO"), ...)
 }
 \arguments{
 \item{x}{object to validate}
 
 \item{\dots}{further arguments passed to or from other methods.}
+
+\item{type_names}{character vector of permissible types}
+
+\item{logger}{optional logger object (see \code{\link{create_logger}})}
 }
 \value{
-validated object of class \code{ospar}
-
-validated object of class \code{long}
-
 validated object of class \code{wide}
 
-validated object of class \code{litter_group}
+validated object of class \code{litter_types}
+
+validated settings (\code{list})
 }
 \description{
 Generic function for validation of file formats.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{ospar}: validate OSPAR data.
+\item \code{litter}: validate litter data.
 
-\item \code{long}: validate long format data.
+\item \code{litter_types}: validate litter_types file
 
-\item \code{wide}: validate wide format data.
-
-\item \code{litter_group}: validate litter_group file
+\item \code{settings}: validate settings file
 }}
 

@@ -4,17 +4,20 @@
 \alias{litter}
 \title{Graphical User Interface to the litteR-package}
 \usage{
-litter(file = NULL)
+litter(filename = NULL)
 }
 \arguments{
-\item{file}{file containing litter data (see vignette for details)}
+\item{filename}{name of file containing settings (see vignette for details)}
 }
 \value{
 An HTML-document in which all the litter analysis results
-(tables, figures, explanotory text) are reported.
+(tables, figures, explanatory text) are reported.
 }
 \description{
 Starts a graphical user interface for analysing litter data.
 A Tcl/Tk-dialogue will be started if one or more arguments
 are missing.
+}
+\details{
+For details, see our vignette by typing: vignette("litter-manual")
 }

@@ -1,0 +1,64 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+logger$info("Entering outlier analysis section")
+```
+
+## Outlier analysis
+
+For each spatial_code, [adjusted boxplots](https://dx.doi.org/doi:10.1016/j.csda.2007.11.008) are given of the total count for [outliers](https://en.wikipedia.org/wiki/Outlier) detection in the period `r str_c(DATE_FROM, " to ", DATE_TO)`. Outliers are given as dots (if any) in the adjusted box-and-whisker plots below. Note that outliers are not necessarily errors.
+
+<br/>
+<br/>
+
+```{r}
+d <- d_ltr %>%
+    filter(type_name == "TC") %>%
+    select(spatial_code, date, tc = count)
+```
+
+```{r width=7, height=7, out.width=600}
+d %>%
+    ggplot(mapping = aes(x = spatial_code, y = tc), alpha = 0.5) +
+        stat_adj_boxplot() +
+        stat_adj_boxplot_outlier() +
+        scale_x_discrete(name = "") +
+        scale_y_continuous(name = "total count") +
+        coord_flip()
+```
+
+
+```{r}
+d <- d %>%
+    group_by(spatial_code) %>%
+    summarise(n = n(), stats = list(adj_boxplot_stats(tc))) %>%
+    split(1:nrow(.)) %>%
+    map_df(function(x) {
+        d %>%
+            mutate(n = x %>% chuck("n")) %>%
+            filter(spatial_code == x %>% chuck("spatial_code")) %>%
+            filter(
+                (tc < (x %>% 
+                    pluck("stats") %>% 
+                    unlist %>% 
+                    chuck("ymin"))) |
+                (tc > (x %>% 
+                    pluck("stats") %>% 
+                    unlist %>% 
+                    chuck("ymax"))))
+    })
+```
+
+
+Outliers, if available, are listed in the table below. In addition, also the number of surveys `n` is reported. Litter experts should decide if outliers are errors and need to be excluded from analysis. Note, however, that due to its non-parametric nature, `litteR` is fairly robust for outliers.
+
+```{r, eval=nrow(d)>0}
+d %>%
+    arrange(spatial_code, tc) %>%
+    select(spatial_code, date, n, tc) %>%
+    rename("total count" = tc) %>%
+    kable()
+```

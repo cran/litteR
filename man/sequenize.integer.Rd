@@ -22,8 +22,5 @@ For instance \code{c(1:5, 8:9)} becomes \code{"1-5, 8-9"}.
 The elements of \code{x} should be unique and in ascending order.
 }
 \examples{
-toString(sequenize(c(1:4, 8:9)))
-}
-\seealso{
-\code{\link{toString}}
+sequenize(c(1:4, 8:9))
 }

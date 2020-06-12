@@ -1,3 +1,17 @@
+# litteR 0.8.0 (2020-06-11)
+
+* simplified version with breaking changes
+* added outlier analysis
+* added separate litter group analysis section plus figures
+* added log-file and more quality control
+* dropped baseline analysis and power analysis
+* updated manual
+* simplified settings files
+* simplified input files
+
+
+
+
 # litteR 0.7.0 (2019-12-09)
 
 * added new litter types to OSPAR-groups file

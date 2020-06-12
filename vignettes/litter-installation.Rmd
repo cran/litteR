@@ -77,4 +77,4 @@ We will occasionally publish new versions of **litteR** on CRAN. The easiest way
 
 # Using **litteR**
 
-For using **litteR** in your projects, please consult our [user manual](litter-manual.html).
+For using **litteR** in your projects, please consult our [user manual](litteR-manual.html).

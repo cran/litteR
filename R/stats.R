@@ -1,6 +1,3 @@
-# prevent notes by R CMD check
-globalVariables(c("mean_count", "rel_abundance", "cum_rel_abundance"))
-
 #' p-value
 #'
 #' Extract p-value.
@@ -32,21 +29,6 @@ test_statistic <- function(x, ...) {
     UseMethod("test_statistic", x)
 }
 
-
-
-#' Statistical Power
-#'
-#' Estimate the statistical power of a test.
-#'
-#' @param x object
-#' @param \dots further arguments passed to or from other methods.
-#' @return power of a test (numeric vector of length 1).
-#'
-#' @references \url{https://en.wikipedia.org/wiki/Statistical_power}
-#' @export
-power <- function(x, ...) {
-    UseMethod("power", x)
-}
 
 
 #' Slope
@@ -300,43 +282,6 @@ iod <- function(x, na.rm = FALSE) {
 
 
 
-
-
-#' Select Most Abundant Litter Types
-#'
-#' Select the \code{fraction} most abundant litter types.
-#'
-#' @param type character vector of litter types
-#' @param count counts for each litter type
-#' @param fraction fraction of most abundant types (numeric value in [0, 1])
-#'
-#' @return Fraction of most abundant litter types in descending order
-#'         (numeric vector of length 1).
-#'
-#' @importFrom purrr "%>%"
-#'
-#' @export
-top <- function(type, count, fraction = 0.8) {
-    if ((fraction <= 0) | (fraction > 1)) {
-        stop(
-            "0 < fraction <= 1 is not true",
-            call. = FALSE
-        )
-    }
-    count %>%
-        tapply(type, sum) %>% {
-            . / sum(.)
-        } %>% {
-            .[order(., decreasing = TRUE)]
-        } %>%
-        cumsum %>% {
-            .[. < fraction]
-        } %>%
-        names
-}
-
-
-
 #' Rolling Statistics
 #'
 #' Applies function \code{fun} within a rolling (moving) window
@@ -471,48 +416,6 @@ test_statistic.wilcoxon <- function(x, ...) {
 p_value.wilcoxon <- function(x, ...) {
     x$p_value
 }
-
-
-#' Power of Wilcoxon Test
-#'
-#' Estimates the power of a Wilcoxon test by means of
-#' Monte Carlo simulation.
-#'
-#' @param x numeric vector
-#' @param n number of samples of \code{x}
-#' @param alpha significance level
-#' @param n_sim number of Monte Carlo samples
-#' @param \dots further arguments passed to or from other methods.
-#'
-#' @return power (numeric vector of length 1).
-#' @importFrom purrr "%>%" rerun flatten_dbl
-#' @export
-#' @references doi:10.1016/j.envpol.2019.02.030
-#'
-#' @examples
-#' # continuous variable
-#' x <- rnorm(n = 25, mean = 1, sd = 2)
-#' w <- wilcoxon(x, mu = 2, type = "less")
-#' p <- power(w, n = 10, alpha = 0.05)
-#'
-#' # discrete variable
-#' x <- rpois(n = 10, lambda = 50)
-#' w <- wilcoxon(x, mu = 60, type = "less")
-#' p <- power(w, n = 10, alpha = 0.05)
-power.wilcoxon <- function(x, n = 10, alpha = 0.05, n_sim = 1000, ...) {
-    n_sim %>%
-        rerun({
-            x$x %>%
-                recdf(n) %>%
-                wilcoxon(type = x$type, mu = x$mu) %>%
-                p_value
-        }) %>%
-        flatten_dbl %>% {
-            . < alpha
-        } %>%
-        mean
-}
-
 
 
 #' Tukey's Trimean
@@ -652,6 +555,10 @@ adj_boxplot_stats <- function(x, ...) {
 #'
 #' @importFrom purrr %>%
 #' @importFrom stats quantile
+#' @seealso \code{\link{stat_adj_boxplot}}
+#'
+#' @examples
+#' adj_boxplot_stats(rlnorm(100))
 #' @export
 adj_boxplot_stats.default <- function(x, ...) {
     Q <- x %>%
@@ -660,16 +567,56 @@ adj_boxplot_stats.default <- function(x, ...) {
     MC <- x %>%
         medcouple
     if (MC < 0) {
-        c(
+        result <- c(
             max(min(x), Q[1] - 1.5 * exp(-3 * MC) * IQR),
             Q,
             min(max(x), Q[3] + 1.5 * exp( 4 * MC) * IQR)
         )
     } else {
-        c(
+        result <- c(
             max(min(x), Q[1] - 1.5 * exp(-4 * MC) * IQR),
             Q,
             min(max(x), Q[3] + 1.5 * exp( 3 * MC) * IQR)
         )
     }
+    names(result) <- c("ymin", "lower", "middle", "upper", "ymax")
+    result
+}
+
+
+
+#' Adjusted Boxplot Statistics for ggplot2
+#'
+#' Computes adjusted boxplot statistics to be used by \code{ggplot2}.
+#' See Hubert & Vandervieren (2008, p.5191, Eq.5).
+#'
+#' @examples
+#' library(ggplot2)
+#'
+#' d <- data.frame(x = gl(2, 50), y = rnorm(100))
+#' ggplot(data = d, mapping = aes(x = x, y = y)) +
+#'    stat_adj_boxplot()
+#'
+#' @references Hubert, M., and E. Vandervieren, 2008.
+#' An adjusted boxplot for skewed distributions.
+#' Computational Statistics and Data Analysis 52:5186-5201
+#' \doi{10.1016/j.csda.2007.11.008}
+#'
+#' @seealso \code{\link{adj_boxplot_stats}}, \code{\link{stat_adj_boxplot_outlier}}
+#'
+#' @export
+stat_adj_boxplot <- function() {
+    stat_summary(fun.data = adj_boxplot_stats, geom = "boxplot")
+}
+
+
+
+#' @describeIn stat_adj_boxplot add outliers to adjusted boxplot
+#' @export
+stat_adj_boxplot_outlier <- function() {
+    outlier <- function(x) {
+        s <- adj_boxplot_stats(x)
+        x[x < s["ymin"] | x > s["ymax"]]
+    }
+    stat_summary(fun = outlier, geom = "point")
 }
