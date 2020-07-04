@@ -1,3 +1,13 @@
+# litteR 0.8.1 (2020-07-03)
+
+* added checks for write access and non permissible path names
+* improved some error and warning messages
+* having duplicated spatial_code/date is no longer an error but
+  a warning. This makes spatial aggregation more convenient.
+* in type file: renamed WAXPOL group to WAX
+
+
+
 # litteR 0.8.0 (2020-06-11)
 
 * simplified version with breaking changes
@@ -8,7 +18,6 @@
 * updated manual
 * simplified settings files
 * simplified input files
-
 
 
 

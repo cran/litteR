@@ -12,7 +12,7 @@
 
 <meta name="author" content="Dennis Walvoort Wageningen Environmental Research, The Netherlands Willem van Loon  Rijkswaterstaat, The Netherlands" />
 
-<meta name="date" content="2020-06-12" />
+<meta name="date" content="2020-07-03" />
 
 <title>Installation manual for RStudio and litteR</title>
 
@@ -26,6 +26,22 @@ document.addEventListener('DOMContentLoaded', function(e) {
     if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
     a = h.attributes;
     while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
   }
 });
 </script>
@@ -228,7 +244,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Installation manual for RStudio and litteR</h1>
 <h4 class="author">Dennis Walvoort <font size="1">Wageningen Environmental Research, The Netherlands</font><br>Willem van Loon <font size="1"> Rijkswaterstaat, The Netherlands</font></h4>
-<h4 class="date">2020-06-12</h4>
+<h4 class="date">2020-07-03</h4>
 
 
 <div id="TOC">
@@ -244,7 +260,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div id="introduction" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>The <strong>litteR</strong>-package requires a <em>recent</em> installation of the <strong>R</strong>-environment (R version 4.0.1 (2020-06-06) or later). In addition, MS-Windows users also need to install <strong>RStudio</strong>, an integrated development environment (IDE) for <strong>R</strong>.</p>
+<p>The <strong>litteR</strong>-package requires a <em>recent</em> installation of the <strong>R</strong>-environment (R version 4.0.2 (2020-06-22) or later). In addition, MS-Windows users also need to install <strong>RStudio</strong>, an integrated development environment (IDE) for <strong>R</strong>.</p>
 <p>The aim of this manual is to help people with no, or only a limited experience with <strong>R</strong> and <strong>RStudio</strong> to</p>
 <ol style="list-style-type: decimal">
 <li>install the <strong>R</strong>-environment;</li>
@@ -260,7 +276,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li>Navigate in a web-browser to <a href="https://cran.r-project.org" class="uri">https://cran.r-project.org</a>;</li>
 <li>Select the <strong>R</strong>-version for your operating system, <em>e.g.</em>, <code>Download R for Windows</code>;</li>
 <li>Select ‘base’;</li>
-<li>Select <code>Download R x.y.z</code> (where x.y.z. is the version number, <em>e.g.</em>, 4.0.1);</li>
+<li>Select <code>Download R x.y.z</code> (where x.y.z. is the version number, <em>e.g.</em>, 4.0.2);</li>
 <li>Double click on the downloaded file and follow the installation instructions on the screen. In case of doubt, simply select the default/recommended settings.</li>
 </ol>
 </div>

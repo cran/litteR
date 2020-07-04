@@ -41,13 +41,12 @@ test_that("duplicates in data file are correctly detected", {
     type_names <- c("p: a [1]", "p: b [2]")
     expect_warning(
         litteR:::validate.litter(d, type_names),
-        regexp = "The following records are duplicated:\n2 and 3$")
+        regexp = str_c("The following records are duplicated: \n2 and 3."))
     d$`p: a [1]`[2] <- 0
-    expect_error(
+    expect_warning(
         litteR:::validate.litter(d, type_names),
         regexp = "`spatial_code` and `date`:\n2 and 3")
 })
-
 
 
 test_that("all columns with litter counts are found", {

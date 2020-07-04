@@ -19,7 +19,7 @@ For each spatial code and the type names and group codes specified in the settin
     - no monotonically _decreasing_ trend in case the Theil-Sen slope is smaller than zero;
 - the number of surveys (N);
 
-A p-value less than an _a priori_ specified [significance level](https://en.wikipedia.org/wiki/Statistical_significance) (say, &alpha; = 0.05), indicates a significant trend. If the p-value is greater than this significance level, we can't say that there is no trend. We can only conclude that our data do not show evidence of a trend (due to lack of data, noise, etc.).
+A p-value less than an _a priori_ specified [significance level](https://en.wikipedia.org/wiki/Statistical_significance) (_e.g._, often &alpha; = 0.05), indicates a significant trend. If the p-value is greater than this significance level, we can't say that there is no trend. We can only conclude that our data do not show evidence for a significant trend (due to lack of data, noise, etc.).
 
 The Mann-Kendall test is a non-parametric test and as such does not make distributional assumptions on the data. 
 

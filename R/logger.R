@@ -1,7 +1,7 @@
 #' Simple Logger
 #'
 #' Logger, in the spirit of loggers like log4j. Implemented logging
-#' levels are DEBUG, INFO, WARNING, ERROR (in increasing order of
+#' levels are DEBUG, INFO, WARN, ERROR (in increasing order of
 #' specificity. Logging events can be filtered to show only
 #' events with a minimum specificity.
 #' 
@@ -20,7 +20,7 @@
 #' logger$info("starting specific computation")
 #' logger$info("Today is {Sys.Date()}")
 create_logger <- function(con = stdout(),
-    level = c("DEBUG", "INFO", "WARNING", "ERROR")) {
+    level = c("DEBUG", "INFO", "WARN", "ERROR")) {
     
     # least specific logging level
     level <- match.arg(level) %>%
@@ -55,13 +55,13 @@ create_logger <- function(con = stdout(),
         warn = function(...) {
             if ("WARN" >= level) {
                 to_logger("WARN", ...)
-                warning(str_c(..., sep = "\n"), call. = FALSE)                
+                warning(str_c(..., sep = "\n"), call. = FALSE)
             }
         },
         error = function(...) {
             if ("ERROR" >= level) {
                 to_logger("ERROR", ...)
-                stop(str_c(..., sep = "\n"), call. = FALSE)                
+                stop(str_c(..., sep = "\n"), call. = FALSE)
             }
         }
     )

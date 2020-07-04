@@ -16,7 +16,7 @@
 #' @importFrom purrr "%>%" chuck pluck flatten_chr map_chr
 #' @importFrom readr read_lines
 #' @importFrom rlang is_null is_na
-#' @importFrom stringr str_c str_sub str_subset str_to_upper str_glue
+#' @importFrom stringr str_c str_sub str_subset str_to_upper str_glue str_detect
 #' @importFrom fs path path_norm path_package path_dir path_ext path_ext_set dir_create
 #'   file_temp dir_copy file_copy
 #'
@@ -38,8 +38,8 @@ litter <- function(filename = NULL) {
             default = "",
             caption = "Select settings file",
             multi = FALSE,
-            filters = matrix(data = c("settings file", ".yaml"), nrow = 1)
-        )
+            filters = matrix(data = c("settings file", ".yaml"), nrow = 1)) %>%
+            str_c(collapse = " ") # workaround to correct for paths with multiple spaces
         if (length(filename) == 0L) {
             message("Selection of the settings file has been cancelled.")
             return(invisible(NULL))
@@ -55,16 +55,31 @@ litter <- function(filename = NULL) {
             )
         }
     }
+    
+    # check if directory name contains a percentage sign '%'
+    # A '%' will lead to errors when creating plots
+    filename %>%
+        path_dir %>%
+        str_detect("%|#") &&
+        stop(
+            "Illegal character found in ",
+            sQuote(filename),
+            "\nPlease use a directory name without a '%' or '#'", call. = FALSE)
 
     # create output directory
     timestamp <- Sys.time() %>%
         format("%Y%m%dT%H%M%S")
     dir_input <- filename %>%
         path_dir
+    dir_input %>%
+        has_write_access ||
+        stop("You do not have permission to write to ", sQuote(dir_input),
+             ".\nPlease select another directory or consult your system administrator.",
+             call. = FALSE)
     dir_output <- dir_input %>%
         path(str_glue("litteR-results-{timestamp}")) %>%
-        dir_create
-
+        dir_create    
+    
     # create, initialize, and finalize logger
     con <- dir_output %>%
         path(str_glue("litteR-log-{timestamp}.log")) %>%
@@ -152,6 +167,7 @@ litter <- function(filename = NULL) {
 #'
 #' @importFrom tcltk tk_choose.files tk_choose.dir
 #' @importFrom fs path_package dir_exists dir_ls file_copy path_dir
+#' @importFrom stringr str_detect
 #' @importFrom rlang is_null
 #'
 #' @export
@@ -186,12 +202,28 @@ create_litter_project <- function(path = NULL) {
                 call. = FALSE)
     }
 
+    # check if directory name contains a percentage sign '%'
+    # A '%' will lead to errors when creating plots
+    path %>%
+        str_detect("%|#") &&
+        stop(
+            "Illegal character found in ",
+            sQuote(path),
+            "\nPlease use a directory name without a '%' or '#'", call. = FALSE)
+    
     # check if project directory is empty
     path %>%
         dir_ls %>%
         length &&
         stop("Project directory ", sQuote(path),
              " should be empty", call. = FALSE)
+
+    # check if project directory has write access
+    path %>%
+        has_write_access ||
+        stop("You do not have permission to write to ", sQuote(path),
+             ".\nPlease select another directory or consult your system administrator.",
+             call. = FALSE)
 
     # populate project directory with example files
     path_package("litteR", "extdata") %>%

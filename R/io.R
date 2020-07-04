@@ -59,9 +59,9 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     is_valid <- is_valid_ymd | is_valid_dmy
     if (any(!is_valid)) {
         logger$error(
-            "Invalid date format found in records: ",
+            "Invalid date or date format found in records: ",
             str_c(enumerate(sequenize(which(!is_valid))), ". "),
-            "Please use YYYY-mm-dd or dd/mm/YYYY."
+            "Please correct the date or use YYYY-mm-dd or dd/mm/YYYY."
         )
     }
     if (all(is_valid_ymd)) {
@@ -211,14 +211,13 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     duplicates <- list_duplicates(x)
     if (length(duplicates) > 0) {
         logger$warn(
-            "The following records are duplicated:",
+            "The following records are duplicated: ",
             duplicates %>% 
                 map_chr(function(x){
                     enumerate(RECORD_ID[x])}) %>%
-                str_c(collapse = "; ")
-        )
-        logger$info(
-            "Only the first record will be retained."
+                str_c(collapse = "; ") %>%
+                str_c(". "),
+            "Only the first record of each duplicate will be retained."
         )
         duplicates <- duplicated(x)
         x <- x %>%
@@ -234,16 +233,19 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
         select(all_of(required_column_names)) %>%
         list_duplicates
     if (length(duplicates) > 0) {
-        logger$error(
+        logger$warn(
             "The following records have different counts for the same ",
             "`spatial_code` and `date`:",
             duplicates %>% 
                 map_chr(function(x){
                     enumerate(RECORD_ID[x])}) %>%
-                str_c(collapse = "; ")
+                str_c(collapse = "; ") %>%
+                str_c(". "),
+            "All these records will be retained in the analysis."
         )
+    } else {
+        logger$info("No records with the same spatial_code/date found")
     }
-    logger$info("No records with the same spatial_code/date found")
     
     # return validated data
     x

@@ -15,7 +15,7 @@ The lines and dots have the following meaning:
 - dots: observations;
 - thin gray line segments: auxiliary line segments to guide the eye (only given for 5 to 24 points);
 - blue line: [loess-smoother](https://en.wikipedia.org/wiki/Local_regression). It is only given for 25 or more points;
-- red line: Theil-Sen trend line (its slope is given in the table above). It is only given for 5 or more points.
+- red line: Theil-Sen trend line (its slope is given in the table above). It is only given for 5 or more points. However, it is recommended to use a minimum period of 4 to 5 years to obtain useful trend results.
 
 
 ```{r fig.width=5, fig.height=3, out.width=449}

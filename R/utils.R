@@ -244,3 +244,15 @@ list_duplicates.data.frame <- function(x, ...) {
         as_tibble %>%
         list_duplicates
 }
+
+
+
+#' Check Write Permission
+#'
+#' Simple wrapper for \code{\link{file.access}} with \code{mode=2}
+#' 
+#' @param path filename
+#' @return \code{TRUE} if write access, \code{FALSE} if not
+has_write_access <- function(path) {
+    file.access(path, 2) == 0
+}

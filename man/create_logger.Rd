@@ -4,7 +4,7 @@
 \alias{create_logger}
 \title{Simple Logger}
 \usage{
-create_logger(con = stdout(), level = c("DEBUG", "INFO", "WARNING", "ERROR"))
+create_logger(con = stdout(), level = c("DEBUG", "INFO", "WARN", "ERROR"))
 }
 \arguments{
 \item{con}{\link{connection} to write logging data to}
@@ -17,7 +17,7 @@ Anonymous logging functions
 }
 \description{
 Logger, in the spirit of loggers like log4j. Implemented logging
-levels are DEBUG, INFO, WARNING, ERROR (in increasing order of
+levels are DEBUG, INFO, WARN, ERROR (in increasing order of
 specificity. Logging events can be filtered to show only
 events with a minimum specificity.
 }
