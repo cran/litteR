@@ -248,7 +248,8 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     }
     
     # return validated data
-    x
+    x %>%
+        mutate(.RECORD_ID = RECORD_ID)
 }
 
 
@@ -261,7 +262,6 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
 #' @importFrom purrr map_lgl map_dfc
 #' @importFrom readr parse_date
 #' @importFrom rlang are_na
-#' @importFrom stringr str_glue
 #' @importFrom stringr str_glue
 validate.litter_types <- function(x, logger = create_logger(level = "INFO"), ...) {
 

@@ -1,3 +1,10 @@
+# litteR 0.8.2 (2020-10-09)
+
+* make litteR robust for duplicated dates
+* explicitly added .groups to summarise()
+
+
+
 # litteR 0.8.1 (2020-07-03)
 
 * added checks for write access and non permissible path names

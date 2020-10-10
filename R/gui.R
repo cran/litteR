@@ -8,8 +8,7 @@
 #'
 #' @details For details, see our vignette by typing: vignette("litter-manual")
 #'
-#' @return An HTML-document in which all the litter analysis results
-#' (tables, figures, explanatory text) are reported.
+#' @return directory name (invisibly) where all results are stored.
 #'
 #' @importFrom tcltk tk_choose.files tk_choose.dir
 #' @importFrom rmarkdown render html_document
@@ -153,6 +152,7 @@ litter <- function(filename = NULL) {
     logger$info(str_glue("All results have been written to {sQuote(dir_output)}"))
     message(str_glue("Finished! All results have been written to {sQuote(dir_output)}"))
     message(str_glue("See also 'litteR-log-{timestamp}.log' for detailed runtime information."))
+    invisible(dir_output)
 }
 
 

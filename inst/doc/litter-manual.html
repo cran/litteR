@@ -12,7 +12,7 @@
 
 <meta name="author" content="Dennis Walvoort Wageningen Environmental Research, The Netherlands Willem van Loon  Rijkswaterstaat, The Netherlands" />
 
-<meta name="date" content="2020-07-03" />
+<meta name="date" content="2020-10-09" />
 
 <title>litteR User Manual</title>
 
@@ -29,22 +29,15 @@ document.addEventListener('DOMContentLoaded', function(e) {
   }
 });
 </script>
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
 
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
-  }
-});
-</script>
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+      </style>
 
 
 
@@ -244,7 +237,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">litteR User Manual</h1>
 <h4 class="author">Dennis Walvoort <font size="1">Wageningen Environmental Research, The Netherlands</font><br>Willem van Loon <font size="1"> Rijkswaterstaat, The Netherlands</font></h4>
-<h4 class="date">2020-07-03</h4>
+<h4 class="date">2020-10-09</h4>
 
 
 <div id="TOC">
@@ -285,7 +278,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p><br> <br> <br></p>
 <div id="introduction" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p><strong>litteR</strong> is a user-friendly tool for analyzing litter data (<em>e.g.</em>, beach litter data). The current version (0.8.1) contains routines for:</p>
+<p><strong>litteR</strong> is a user-friendly tool for analyzing litter data (<em>e.g.</em>, beach litter data). The current version (0.8.2) contains routines for:</p>
 <ul>
 <li>data quality control</li>
 <li>outlier analysis</li>
@@ -728,7 +721,7 @@ NL
 </tbody>
 </table>
 <p>The columns <code>spatial_code</code> and <code>date</code> are required. The remaning codes are either litter types or optional metadata. Each litter type should also be available in the <a href="#type_file">litter type file</a>. Only litter types in the <a href="#type_file">litter type file</a> are valid. Column names that are neither valid litter types nor <code>spatial_code</code> or <code>date</code> are considered as optional metadata columns. These columns do not affect the results. In the example above, country codes have been added as metadata.</p>
-<p>The column <code>spatial_code</code> gives the spatial aggregation level. All analysis results will be presented on this spatial aggregation level. In the example above, the spatial aggregation level is the beach where the litter surveys took place. However, higher spatial aggregation levels such as the country level, or regional levels can also be used. The <code>date</code> column gives the monitoring date in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO</a> format, <em>i.e.</em>, YYYY-mm-dd (for example 2020-07-03, to indicate 3 July 2020). For convenience, also the OSPAR-format (dd/mm/YYYY) is currently supported (for example 03/07/2020, to indicate 3 July 2020).</p>
+<p>The column <code>spatial_code</code> gives the spatial aggregation level. All analysis results will be presented on this spatial aggregation level. In the example above, the spatial aggregation level is the beach where the litter surveys took place. However, higher spatial aggregation levels such as the country level, or regional levels can also be used. The <code>date</code> column gives the monitoring date in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO</a> format, <em>i.e.</em>, YYYY-mm-dd (for example 2020-10-09, to indicate 9 October 2020). For convenience, also the OSPAR-format (dd/mm/YYYY) is currently supported (for example 09/10/2020, to indicate 9 October 2020).</p>
 <p>The third column <code>country_code</code>, in the type file given above, is not required and will not be used in the analysis. The remaining columns <code>Plastic: Bags [2]</code>, <code>Plastic: Small_bags [3]</code>, etc. contain the counts for each litter type that are selected in the <a href="#type_file">litter type file</a>.</p>
 </div>
 <div id="settings_file" class="section level2" number="4.3">
@@ -756,7 +749,7 @@ type_name: [&quot;Plastic: Bags [2]&quot;]
 figure_quality: low</code></pre>
 <p>The settings-file contains the following entries:</p>
 <ul>
-<li><code>date_min</code> and <code>date_max</code>, the first and final date of the period to analyze. Dates should be given in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO</a> format, <em>i.e.</em>, YYYY-mm-dd (for example 2020-07-03, to indicate 3 July 2020);</li>
+<li><code>date_min</code> and <code>date_max</code>, the first and final date of the period to analyze. Dates should be given in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO</a> format, <em>i.e.</em>, YYYY-mm-dd (for example 2020-10-09, to indicate 9 October 2020);</li>
 <li><code>percentage_total_count</code>: the percentage of the total count used to estimate statistics. See the section on <a href="#descriptive_statistics">descriptive statistics</a> for more information;</li>
 <li><code>file_data</code>: name of the <a href="#data_file">data file</a> (including its path, <em>e.g.</em>, c:/my-litter-directory/my-litter-data.csv);</li>
 <li><code>file_types</code>: name of the <a href="#type_file">type file</a> (including its path, <em>e.g.</em>, c:/my-litter-directory/types-ospar.csv);</li>

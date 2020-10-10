@@ -234,17 +234,16 @@ d_grp <- d_type %>%
       filter(group_code == x) %>%
       select(type_name) %>%
       left_join(d_ltr, by = "type_name") %>%
-      group_by(spatial_code, date) %>%
-      summarise(count = sum(count)) %>%
-      ungroup %>%
+      group_by(spatial_code, date, .RECORD_ID) %>%
+      summarise(count = sum(count), .groups = "drop") %>%
       filter(!are_na(count)) %>%
-      mutate(type_name = x)}) 
+      mutate(type_name = x)})
 
-# computing relative group totals (relative w.r.t. TC)
+logger$info(str_glue("Computing relative group totals (relative w.r.t. TC)"))
 d_grp <- d_grp %>% 
   filter(type_name == "TC") %>%
-  select(spatial_code, date, TC = count) %>%
-  right_join(d_grp, by = c("spatial_code", "date")) %>%
+  select(spatial_code, date, .RECORD_ID, TC = count) %>%
+  right_join(d_grp, by = c("spatial_code", "date", ".RECORD_ID")) %>%
   mutate(rel_count = 100 * count / TC) %>%
   select(-TC)
 
@@ -253,10 +252,10 @@ d <- d_grp %>%
   filter(type_name == "TC") %>%
   select(spatial_code, date, TC = count) %>%
   group_by(spatial_code) %>%
-  summarise(sum_TC = sum(TC)) %>%
+  summarise(sum_TC = sum(TC), .groups = "drop") %>%
   left_join(d_ltr, by = "spatial_code") %>%
   group_by(spatial_code, sum_TC, type_name) %>%
-  summarise(sum_count = sum(count)) %>%
+  summarise(sum_count = sum(count), .groups = "drop") %>%
   arrange(spatial_code, desc(sum_count)) %>%
   group_by(spatial_code) %>%
   mutate(rel_count = 100 * cumsum(sum_count) / sum_TC) %>%
@@ -267,8 +266,8 @@ d <- d_grp %>%
 # adding relative counts to litter types
 d_ltr <- d_grp %>%
   filter(type_name == "TC") %>%
-  select(spatial_code, date, TC = count) %>%
-  right_join(d_ltr, by = c("spatial_code", "date")) %>%
+  select(spatial_code, date, .RECORD_ID, TC = count) %>%
+  right_join(d_ltr, by = c("spatial_code", "date", ".RECORD_ID")) %>%
   mutate(rel_count = 100 * count / TC) %>%
   select(-TC) %>%
   arrange(spatial_code, date, desc(rel_count)) 

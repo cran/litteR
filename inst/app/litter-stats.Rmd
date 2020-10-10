@@ -57,8 +57,8 @@ d_stats <- d_ltr %>%
                 p_value(mann_kendall(count, "increasing")),
                 p_value(mann_kendall(count, "decreasing"))
             )
-        )) %>%
-    ungroup %>%
+        ),
+        .groups = "drop") %>%
     select(-ts)
 
 # store stats in a CSV-file

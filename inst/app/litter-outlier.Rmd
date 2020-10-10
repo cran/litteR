@@ -34,7 +34,7 @@ d %>%
 ```{r}
 d <- d %>%
     group_by(spatial_code) %>%
-    summarise(n = n(), stats = list(adj_boxplot_stats(tc))) %>%
+    summarise(n = n(), stats = list(adj_boxplot_stats(tc)), .groups = "drop") %>%
     split(1:nrow(.)) %>%
     map_df(function(x) {
         d %>%

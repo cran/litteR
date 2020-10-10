@@ -10,8 +10,7 @@ litter(filename = NULL)
 \item{filename}{name of file containing settings (see vignette for details)}
 }
 \value{
-An HTML-document in which all the litter analysis results
-(tables, figures, explanatory text) are reported.
+directory name (invisibly) where all results are stored.
 }
 \description{
 Starts a graphical user interface for analysing litter data.
