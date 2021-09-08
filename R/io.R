@@ -1,5 +1,6 @@
 # prevent notes by R CMD check
-globalVariables(c(".", "group_code", "spatial_code", "type_name", "value", "included"))
+globalVariables(c(".", "group_code", "location_code",
+                  "type_name", "TYPE_NAME", "value", "INCLUDED"))
 
 
 #' Validation of LitteR File Formats
@@ -23,7 +24,8 @@ validate <- function(x, ...) {
 #' @importFrom purrr discard
 #' @importFrom tidyselect all_of
 #' @importFrom stringr str_glue
-validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"), ...) {
+validate.litter <- function(x, type_names,
+                            logger = create_logger(level = "INFO"), ...) {
 
     # create persistent record identifier
     RECORD_ID <- seq_len(nrow(x))
@@ -35,18 +37,28 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
         str_to_lower
 
     # check required columns
-    required_column_names <- c("spatial_code", "date")
+    required_column_names <- c("location_code", "date")
     logger$info(str_glue("Check if required metadata columns {enumerate(sQuote(required_column_names))} exist."))
     missing_column_names <- required_column_names %>%
         setdiff(names(x))
     n_missing_column_names <- length(missing_column_names)
     if (n_missing_column_names == 1L) {
         logger$error(str_glue("Column {sQuote(missing_column_names)} is missing in the data file."))
-    } 
+    }
     if (n_missing_column_names > 1L) {
         logger$error(str_glue("Columns {enumerate(sQuote(missing_column_names))} are missing in the data file."))
     }
     logger$info("All required columns are available")
+
+    # check optional columns
+    logger$info(str_glue("Check if optional columns are available."))
+    optional_column_names <- c("region_code") %>%
+        intersect(names(x))
+    if (length(optional_column_names) == 0L) {
+        logger$info("No optional columns found.")
+    } else {
+        logger$info(str_glue("Optional column(s) found: {enumerate(sQuote(optional_column_names))}"))
+    }
 
 
     logger$info("Checking date format")
@@ -85,7 +97,8 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
 
 
     logger$info("Check if all litter types in the type file are present in the data file")
-    missing_type_names <- type_names %>% setdiff(names(x))
+    missing_type_names <- type_names %>%
+        setdiff(names(x))
     if (length(missing_type_names) == 0L) {
         logger$info("All litter types are present")
     } else {
@@ -94,7 +107,7 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
             enumerate(sQuote(missing_type_names))
         )
     }
-    
+
 
     logger$info("Select only litter data")
     type_names <- x %>%
@@ -103,7 +116,7 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     if (length(type_names) == 0L) {
         logger$error("No columns with litter data found. See the type file for valid litter types.")
     }
-    sel <- c(required_column_names, type_names)
+    sel <- c(required_column_names, optional_column_names, type_names)
     redundant_column_names <- x %>%
         names %>%
         setdiff(sel)
@@ -114,7 +127,7 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     }
     x <- x %>%
         select(all_of(sel))
-    
+
     logger$info("Check for empty cells")
     has_empty_cell <- x %>%
         select(all_of(type_names)) %>%
@@ -123,7 +136,7 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
         })
     if (any(has_empty_cell)) {
         logger$error(
-            "The following data columns contain empty cells:",
+            "The following data column(s) contain(s) empty cells:",
             enumerate(names(has_empty_cell)[has_empty_cell])
         )
     }
@@ -148,9 +161,9 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     type_names <- type_names %>%
         setdiff(no_number)
     x <- x %>%
-        select(all_of(c(required_column_names, type_names)))
+        select(all_of(c(required_column_names, optional_column_names, type_names)))
 
-    
+
     logger$info("Check that litter counts are nonnegative numbers")
     is_negative_number <- x %>%
         select(all_of(type_names)) %>%
@@ -167,7 +180,7 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
         logger$info("No negative numbers found")
     }
 
-    
+
     logger$info("Check that litter counts are natural numbers")
     no_natural_number <- x %>%
         select(all_of(type_names)) %>%
@@ -205,15 +218,15 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
     } else {
         logger$info("No records found with only zero-counts")
     }
-    
-    
+
+
     logger$info("Check for duplicated records")
     duplicates <- list_duplicates(x)
     if (length(duplicates) > 0) {
         logger$warn(
             "The following records are duplicated: ",
-            duplicates %>% 
-                map_chr(function(x){
+            duplicates %>%
+                map_chr(function(x) {
                     enumerate(RECORD_ID[x])}) %>%
                 str_c(collapse = "; ") %>%
                 str_c(". "),
@@ -228,25 +241,25 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
         logger$info("No duplicated records found")
     }
 
-    # check for records with the same spatial_code/date
+    # check for records with the same location_code/date
     duplicates <- x %>%
         select(all_of(required_column_names)) %>%
         list_duplicates
     if (length(duplicates) > 0) {
         logger$warn(
             "The following records have different counts for the same ",
-            "`spatial_code` and `date`:",
-            duplicates %>% 
-                map_chr(function(x){
+            "`location_code` and `date`:",
+            duplicates %>%
+                map_chr(function(x) {
                     enumerate(RECORD_ID[x])}) %>%
                 str_c(collapse = "; ") %>%
                 str_c(". "),
             "All these records will be retained in the analysis."
         )
     } else {
-        logger$info("No records with the same spatial_code/date found")
+        logger$info("No records with the same location_code/date found")
     }
-    
+
     # return validated data
     x %>%
         mutate(.RECORD_ID = RECORD_ID)
@@ -266,12 +279,14 @@ validate.litter <- function(x, type_names, logger = create_logger(level = "INFO"
 validate.litter_types <- function(x, logger = create_logger(level = "INFO"), ...) {
 
     logger$info("Validating type file")
-    names(x) <- str_to_lower(names(x))
-    
+    names(x) <- x %>%
+        names %>%
+        str_to_upper
+
     logger$info("Checking required columns in type file")
     x <- x %>%
         map_dfc(str_to_lower)
-    required_column_names <- c("type_name", "included")
+    required_column_names <- c("TYPE_NAME", "INCLUDED")
     missing_column_names <- required_column_names %>%
         setdiff(names(x))
     n_missing_column_names <- length(missing_column_names)
@@ -282,16 +297,16 @@ validate.litter_types <- function(x, logger = create_logger(level = "INFO"), ...
         logger$error(str_glue("Columns {sQuote(enumerate(missing_column_names))} are missing"))
     }
     logger$info("Required columns are available")
-    
+
     logger$info("Checking type names for duplicates")
-    if (anyDuplicated(x$type_name)) {
+    if (anyDuplicated(chuck(x, "TYPE_NAME"))) {
         logger$error("Duplicated type names found. These are not allowed")
     }
     logger$info("No duplicates found")
-    
+
     logger$info("Checking if table cells are either empty or 'x'")
     entry_ok <- x %>%
-        select(-starts_with("type_")) %>%
+        select(!starts_with("TYPE_")) %>%
         map_lgl(function(x) {
             all(are_na(x) | (x == "x"))
         })
@@ -302,7 +317,7 @@ validate.litter_types <- function(x, logger = create_logger(level = "INFO"), ...
         )
     }
     logger$info("All table cells are OK")
-    
+
     x
 }
 
@@ -351,10 +366,10 @@ validate.settings <- function(x, logger = create_logger(level = "INFO"), ...) {
                 "Optional setting 'figure_quality' is missing. ",
                 "Its default ({x$figure_quality}) will be used.")))
     }
-    if (is_null(pluck(x, "spatial_code"))) {
+    if (is_null(pluck(x, "location_code"))) {
         logger$info(
             str_glue(str_c(
-                "Optional setting 'spatial_code' is missing. ",
+                "Optional setting 'location_code' is missing. ",
                 "Trend plots can't be created")))
     }
     if (is_null(pluck(x, "type_name"))) {
@@ -383,7 +398,7 @@ validate.settings <- function(x, logger = create_logger(level = "INFO"), ...) {
     n_missing_column_names <- length(missing_column_names)
     if (n_missing_column_names == 1L) {
         logger$error(str_glue("Setting {sQuote(missing_column_names)} is missing"))
-    } 
+    }
     if (n_missing_column_names  > 1L) {
         logger$error(str_glue("Settings {enumerate(sQuote(missing_column_names))} are missing"))
     }
@@ -416,21 +431,21 @@ validate.settings <- function(x, logger = create_logger(level = "INFO"), ...) {
         logger$error(str_glue("Setting 'date_min' ({x$date_min}) should be earlier than 'date_max' ({x$date_max})"))
     }
     logger$info("Settings 'date_min' and 'date_max' are valid")
-    
-    
+
+
     logger$info("Checking setting 'percentage_total_count'")
     if (!(x$percentage_total_count %>% between(1, 100))) {
         logger$error("Setting 'percentage_total_count' should be within 1-100")
     }
     logger$info("Setting 'percentage_total_count' is valid")
 
-    
+
     logger$info("Checking setting 'figure_quality'")
     if (!(x$figure_quality %in% c("low", "high"))) {
         logger$error("'Setting 'figure_quality' should be 'low' or 'high'")
     }
     logger$info("Setting 'figure_quality' is valid")
-    
+
     # return settings
     x
 }
@@ -458,12 +473,20 @@ validate.settings <- function(x, logger = create_logger(level = "INFO"), ...) {
 #' @export
 read_litter <- function(filename, logger = create_logger(level = "INFO"), type_names) {
 
+    logger$info(str_glue(
+        "Checking extension of {sQuote(filename)} (should be 'csv')"))
+    if (str_to_lower(path_ext(filename)) != "csv") {
+        logger$error(str_glue(
+            "file {sQuote(filename)} should have 'csv' as extension."))
+    }
+    logger$info(str_glue("file extension is correct"))
+
     logger$info(str_glue("Checking existence of {sQuote(filename)}"))
     if (!file_exists(filename)) {
         logger$error(str_glue("file {sQuote(filename)} not found."))
     }
     logger$info(str_glue("{sQuote(filename)} exists"))
-    
+
     logger$info("Checking if CSV-file is comma delimited")
     n <- filename %>%
         count_fields(tokenizer_csv(), n_max = 1L)
@@ -471,19 +494,19 @@ read_litter <- function(filename, logger = create_logger(level = "INFO"), type_n
         logger$error("Incorrect column delimiter is used in the data file. Please use a comma.")
     }
     logger$info("CSV-file is comma delimited")
-    
+
     logger$info("Reading litter data file")
     d <- suppressMessages(read_csv(filename, guess_max = 10000))
     class(d) <- c("litter", class(d))
 
     # validate and reformat file
     d %>%
-        validate(type_names,logger) %>%
+        validate(type_names, logger) %>%
         pivot_longer(
             cols = intersect(names(.), type_names),
             names_to = "type_name", values_to = "count") %>%
-        mutate(spatial_code = as.character(spatial_code)) %>%     
-        arrange(spatial_code, date, type_name)
+        mutate(location_code = as.character(location_code)) %>%
+        arrange(location_code, date, type_name)
 }
 
 
@@ -514,15 +537,23 @@ read_litter_types <- function(filename, logger = create_logger(level = "INFO")) 
     d <- filename %>%
         read_csv(col_types = cols(.default = col_character()))
     class(d) <- c("litter_types", class(d))
-    d %>%
+    d <- d %>%
         validate(logger) %>%
-        filter(!are_na(included)) %>%
-        rename(tc = included) %>%
-        pivot_longer(cols = !starts_with("type_"),
-                     names_to = "group_code", values_to = "value") %>%
+        filter(!are_na(INCLUDED)) %>%
+        rename(TC = INCLUDED)
+    group_codes <- d %>%
+        names %>%
+        setdiff("TYPE_NAME")
+    d %>%
+        pivot_longer(cols = all_of(group_codes),
+                     names_to = "group_code",
+                     values_to = "value") %>%
         filter(!are_na(value)) %>%
         select(-value) %>%
-        mutate(group_code = str_to_upper(group_code))
+        mutate(
+            group_code = group_code %>%
+                factor(levels = group_codes, ordered = TRUE)) %>%
+        rename(type_name = TYPE_NAME)
 }
 
 
@@ -547,5 +578,3 @@ read_settings <- function(filename, logger = create_logger(level = "INFO")) {
     d %>%
         validate(logger)
 }
-
-

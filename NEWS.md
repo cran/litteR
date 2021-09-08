@@ -1,3 +1,12 @@
+# litteR 0.9.0 (2021-09-08)
+
+* added regional Kendall for trend analysis
+* y-axis in plots can now be truncated to improve interpretation
+* updated user manual
+* added tests
+
+
+
 # litteR 0.8.2 (2020-10-09)
 
 * make litteR robust for duplicated dates

@@ -1,0 +1,92 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+logger$info("Entering descriptive regional statistics section")
+```
+
+<br/>
+<br/>
+
+```{r}
+logger$info("Creating table with regional litter statistics")
+
+# estimate stats
+d_stats_reg <- d_ltr %>%
+    group_by(type_name, region_code, location_code) %>%
+    summarise(
+        n = n(),
+        mean = mean(count),
+        median = median(count),
+        ts = list(theil_sen(date, count)),
+        b0 = ts %>%
+          first %>%
+          intercept,
+        b1 = ts %>%
+          first %>%
+          slope,
+        .groups = "drop_last") %>%
+    select(-ts) %>%
+    summarise(
+        n = sum(n),
+        mean = mean(mean),
+        median = median(median),
+        b0 = median(b0),
+        b1 = median(b1),
+        .groups = "drop")
+
+d <- d_ltr %>%
+    group_by(region_code, type_name) %>%
+    summarise(
+        p_value = p_value(
+            regional_kendall(count, t = date, r = location_code,
+                             type = "decreasing")),
+        .groups = "drop")
+
+d_stats_reg <- d_stats_reg %>%
+    left_join(d, by = c("region_code", "type_name")) %>%
+    mutate(
+        slope = b1 * 365.25,
+        p_value = if_else(slope > 0, 1 - p_value, p_value))
+
+```
+
+## Regional descriptive statistics
+
+The regional statistics for the litter groups are given in the table below. They all (except for the p-value) have been estimated in a stepwise fashion:
+
+1. compute the statistic for each individual location within a specific region (see also previous section);
+2. compute the same statistic for the results in step 1.
+
+Note that these statistics are all so called intra-block statistics, _i.e._, data from individual beaches are not merged. Instead, first the beach statistics are calculated and these are then aggregated as described below. Also note that these statistics, in fact, only describe the individual beaches within a region and not necessarily describe the region as a whole statistically correctly.
+
+The statistics are:
+
+-   `n`: number of surveys;
+
+-   `mean`:, *i.e.*, the [regional mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of the individual mean beach counts within a region for each litter group;
+
+-   `median`:, *i.e.*, the [regional median](https://en.wikipedia.org/wiki/Median) of the individual median beach counts within a region for each litter group;
+
+- `slope`: the median of the Theil-Sen slopes of the individual beaches within a region for each litter group. Data from different beaches have not been mixed in the computation of the Theil-Sen slopes. This method is similar to the one in Gilbert (1987) except that in our procedure all beaches within a region contribute equally to the regional trend.
+
+- `p_value`: the p-values for each regional trend (`slope`) are computed by means of the expressions given in [Van Belle & Hughes, 1984](http://dx.doi.org/10.1029/WR020i001p00127) (Eqs. 2 and 7) and [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring) (Eqs. 17.1 - 17.5).
+
+The trend statistics can only be computed if all `location_code`s of a `region_code` have at least three records (surveys). If that is not the case, the table below contains `NA`.
+
+<br/>
+<br/>
+
+```{r}
+d_stats_reg %>%
+    filter(type_name == str_to_upper(type_name)) %>% # group codes
+    select(region_code, type_name, n, mean, median, slope, p_value) %>%
+    rename(group_code = type_name) %>%
+    arrange(region_code, desc(median)) %>%
+    mutate(across(where(is_double) & !p_value, ~ formatC(.x, format = "fg", digits = 4))) %>%
+    mutate(p_value = formatC(p_value, format = "f", digits = 4)) %>%
+    kable(align = "llrrrrr")
+```

@@ -48,7 +48,7 @@ The latest version of **R** can be downloaded from the Comprehensive **R** Archi
 
 # Installation of **RStudio**
 
-The latest version of **RStudio** can be downloaded from the [RStudio](https://rstudio.com) website: https://rstudio.com:
+The latest version of **RStudio** can be downloaded from the [RStudio](https://www.rstudio.com) website: https://www.rstudio.com:
 
 1. Click the download RStudio button;
 1. Click the download RStudio Desktop button;

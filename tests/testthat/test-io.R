@@ -1,6 +1,6 @@
-test_that("litter readers produce messages", {
+test_that("litter readers produce error/warning/informative messages", {
     d <- dplyr::tribble(
-        ~spatial_code,        ~date,  ~`p: a [1]`, ~dummy,
+        ~location_code,        ~date,  ~`p: a [1]`, ~dummy,
                     1, "15/01/2020",            3,      4,
                     1, "16/01/2020",            3,      4,
                     1, "17/01/2020",            3,      4
@@ -9,13 +9,16 @@ test_that("litter readers produce messages", {
     expect_warning(
         litteR:::validate.litter(d, type_names),
         regexp = "The following types in the type file are missing in the data file")
+    expect_error(
+        litteR::read_litter("test.xyz")
+    )
 })
 
 
 
 test_that("litter readers handle NA properly", {
     d <- dplyr::tribble(
-        ~spatial_code,        ~date,  ~`p: a [1]`, ~`p: b [2]`,
+        ~location_code,        ~date,  ~`p: a [1]`, ~`p: b [2]`,
                     1, "15/01/2020",            3,           4,
                     1, "16/01/2020",     NA_real_,           4,
                     1, "17/01/2020",            3,           4
@@ -23,7 +26,7 @@ test_that("litter readers handle NA properly", {
     type_names <- c("p: a [1]", "p: b [2]")
     expect_error(
         litteR:::validate.litter(d, type_names),
-        "The following data columns contain empty cells"
+        "The following data column\\(s\\) contain\\(s\\) empty cells"
     )
 })
 
@@ -31,7 +34,7 @@ test_that("litter readers handle NA properly", {
 
 test_that("duplicates in data file are correctly detected", {
     d <- dplyr::tribble(
-       ~spatial_code,    ~date,      ~`p: a [1]`, ~`p: b [2]`,
+       ~location_code,    ~date,      ~`p: a [1]`, ~`p: b [2]`,
                    1, "15/01/2020",            3,           4,
                    1, "16/01/2020",            3,           4,
                    1, "16/01/2020",            3,           4,
@@ -45,13 +48,13 @@ test_that("duplicates in data file are correctly detected", {
     d$`p: a [1]`[2] <- 0
     expect_warning(
         litteR:::validate.litter(d, type_names),
-        regexp = "`spatial_code` and `date`:\n2 and 3")
+        regexp = "`location_code` and `date`:\n2 and 3")
 })
 
 
 test_that("all columns with litter counts are found", {
     d <- tibble(
-        spatial_code = c(1, 1, 1, 1),
+        location_code = c(1, 1, 1, 1),
         date = as.Date("2020-01-24") + 0:3)
     type_names <- c("Plastic: Yokes [1]")
     expect_warning(
@@ -73,5 +76,5 @@ test_that("all columns with litter counts are found", {
     d$`Plastic: Yokes [1]` <- c(3, NA, 3, 3)
     expect_error(
         litteR:::validate.litter(d, type_names),
-        regexp = "The following data columns contain empty cells")
+        regexp = "The following data column\\(s\\) contain\\(s\\) empty cells")
 })

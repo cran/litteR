@@ -7,9 +7,12 @@ editor_options:
 logger$info("Entering trend analysis section")
 ```
 
+<br/>
+<br/>
+
 ## Trend analysis
 
-For each spatial code and the type names and group codes specified in the settings file, the following statistics have been estimated for the period `r str_c(DATE_FROM, " to ", DATE_TO)`:
+For each location code and the type names and group codes specified in the settings file, the following statistics have been estimated for the period `r str_c(DATE_FROM, " to ", DATE_TO)`:
 
 - from: the first date of the time-series;
 - to: the final date of the time-series;
@@ -24,25 +27,26 @@ A p-value less than an _a priori_ specified [significance level](https://en.wiki
 The Mann-Kendall test is a non-parametric test and as such does not make distributional assumptions on the data. 
 
 <br/>
-<br/>
 
 ```{r}
-# check spatial codes
-missing_spatial_codes <- SPATIAL_CODE %>%
-  setdiff(unique(d_stats$spatial_code))
-if (length(missing_spatial_codes) > 0) {
-    logger$warn(str_glue("The following specified spatial code(s) are not found and will be skipped: {enumerate(sQuote(missing_spatial_codes))}"))
+# check location_codes
+missing_location_codes <- LOCATION_CODE %>%
+  setdiff(unique(d_stats$location_code))
+if (length(missing_location_codes) > 0) {
+    logger$warn("The following specified location code(s) are not found and will be skipped: ",
+        missing_location_codes %>% sQuote %>% enumerate)
 }
-SPATIAL_CODE <- d_stats %>%
-    chuck("spatial_code") %>% 
+LOCATION_CODE <- d_stats %>%
+    chuck("location_code") %>% 
     unique %>%
-    intersect(SPATIAL_CODE)
+    intersect(LOCATION_CODE)
 
 # check type names
 missing_type_names <- TYPE_NAME %>%
   setdiff(unique(d_stats$type_name))
 if (length(missing_type_names) > 0) {
-    logger$warn(str_glue("The following specified type name(s) are not found and will be skipped: {enumerate(sQuote(missing_type_names))}"))
+    logger$warn("The following specified type name(s) are not found and will be skipped: ",
+        missing_type_names %>% sQuote %>% enumerate)
 }
 TYPE_NAME <- d_stats %>%
     chuck("type_name") %>% 
@@ -53,7 +57,8 @@ TYPE_NAME <- d_stats %>%
 missing_group_codes <- GROUP_CODE %>%
   setdiff(unique(d_stats$type_name))
 if (length(missing_group_codes) > 0) {
-    logger$warn(str_glue("The following specified group code(s) are not found and will be skipped: {sQuote(enumerate(missing_group_codes))}"))
+    logger$warn("The following specified group code(s) are not found and will be skipped: ",
+          missing_group_codes %>% sQuote %>% enumerate)
 }
 GROUP_CODE <- d_stats %>%
     chuck("type_name") %>% 
@@ -61,19 +66,21 @@ GROUP_CODE <- d_stats %>%
     intersect(GROUP_CODE)
 ```
 
+<br/>
+
 ```{r}
 logger$info("Creating table with trend statistics")
 d_stats %>%
     filter(type_name %in% unique(c("TC", TYPE_NAME, GROUP_CODE))) %>%
     mutate(
-        p_value = formatC(p_value, format = "f", digits = 3),
+        p_value = formatC(p_value, format = "f", digits = 4),
         slope = b1 * 365.25) %>%
-    select(spatial_code, type_name, from, to, slope, `p-value` = p_value, N = n) %>%
-    arrange(spatial_code, desc(abs(slope))) %>%
+    select(location_code, type_name, from, to, N = n, slope, `p-value` = p_value) %>%
+    arrange(location_code, desc(abs(slope))) %>%
     rename(`type name / group code` = type_name) %>%
     mutate_if(
         is_double,
-        formatC, format = "fg", digits = 3) %>%
+        formatC, format = "fg", digits = 4) %>%
     kable(align = "llllrrr")
 logger$info("Table with trend statistics created")
 ```
@@ -83,11 +90,9 @@ logger$info("Table with trend statistics created")
 > Descriptive statisics and trend analysis results have been stored in file `r sQuote(basename(FILE_STATS))`.
 
 
-<br/>
-<br/>
-```{r eval=length(SPATIAL_CODE) == 0L}
-  logger$info("No valid spatial_code(s) found. Therefore, time-series plot are skipped")
+```{r eval=length(LOCATION_CODE) == 0L}
+  logger$info("No valid location_code(s) found. Therefore, time-series plot are skipped.")
 ```
 
-```{r, child=system.file("app", "litter-trend-plots.Rmd", package = "litteR"), eval=length(SPATIAL_CODE) != 0L}
+```{r, child=system.file("app", "litter-trend-plots.Rmd", package = "litteR"), eval=length(LOCATION_CODE) != 0L}
 ```

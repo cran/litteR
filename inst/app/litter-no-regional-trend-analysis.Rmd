@@ -1,0 +1,12 @@
+---
+output: html_document
+---
+
+```{r}
+logger$info(
+    str_glue("No regional trend analysis will be performed because column 'region_code' is missing in {sQuote(FILE_DATA)}")
+)
+```
+
+> No regional trend analysis has been performed because column `region_code` is missing in the data file.
+

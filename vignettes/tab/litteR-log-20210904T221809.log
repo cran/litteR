@@ -1,0 +1,83 @@
+2021-09-04 22:18:09 [INFO] Starting a new litteR session
+2021-09-04 22:18:09 [INFO] litteR version: 0.9.0
+2021-09-04 22:18:09 [INFO] litteR release date: 2021-08-20
+2021-09-04 22:18:09 [INFO] Reading settings file ‘settings.yaml’
+2021-09-04 22:18:09 [INFO] Check optional settings...
+2021-09-04 22:18:09 [INFO] Check existence of required settings...
+2021-09-04 22:18:09 [INFO] All required settings are available
+2021-09-04 22:18:09 [INFO] Checking settings 'date_min' and 'date_max'
+2021-09-04 22:18:09 [INFO] Settings 'date_min' and 'date_max' are valid
+2021-09-04 22:18:09 [INFO] Checking setting 'percentage_total_count'
+2021-09-04 22:18:09 [INFO] Setting 'percentage_total_count' is valid
+2021-09-04 22:18:09 [INFO] Checking setting 'figure_quality'
+2021-09-04 22:18:09 [INFO] Setting 'figure_quality' is valid
+2021-09-04 22:18:09 [INFO] Settings file has been read
+2021-09-04 22:18:09 [INFO] Constructing filename for report
+2021-09-04 22:18:09 [INFO] Filename ‘litteR-results-20210904T221809.html’ created
+2021-09-04 22:18:09 [INFO] Construct filename for storing statistics
+2021-09-04 22:18:09 [INFO] Filename ‘litteR-results-20210904T221809.csv’ created
+2021-09-04 22:18:09 [INFO] Starting litter analysis
+2021-09-04 22:18:10 [INFO] Checking parameters in settings file
+2021-09-04 22:18:10 [INFO] Entering data quality control section
+2021-09-04 22:18:10 [INFO] Checking existence of 'types-ospar.csv'
+2021-09-04 22:18:10 [INFO] 'types-ospar.csv' exists
+2021-09-04 22:18:10 [INFO] Validating type file
+2021-09-04 22:18:10 [INFO] Checking required columns in type file
+2021-09-04 22:18:10 [INFO] Required columns are available
+2021-09-04 22:18:10 [INFO] Checking type names for duplicates
+2021-09-04 22:18:10 [INFO] No duplicates found
+2021-09-04 22:18:10 [INFO] Checking if table cells are either empty or 'x'
+2021-09-04 22:18:10 [INFO] All table cells are OK
+2021-09-04 22:18:10 [INFO] Checking extension of 'beach-litter-nl-2012-2017.csv' (should be 'csv')
+2021-09-04 22:18:10 [INFO] file extension is correct
+2021-09-04 22:18:10 [INFO] Checking existence of 'beach-litter-nl-2012-2017.csv'
+2021-09-04 22:18:10 [INFO] 'beach-litter-nl-2012-2017.csv' exists
+2021-09-04 22:18:10 [INFO] Checking if CSV-file is comma delimited
+2021-09-04 22:18:10 [INFO] CSV-file is comma delimited
+2021-09-04 22:18:10 [INFO] Reading litter data file
+2021-09-04 22:18:10 [INFO] Check if required metadata columns 'location_code' and 'date' exist.
+2021-09-04 22:18:10 [INFO] All required columns are available
+2021-09-04 22:18:10 [INFO] Check if optional columns are available.
+2021-09-04 22:18:10 [INFO] Optional column(s) found: 'region_code'
+2021-09-04 22:18:10 [INFO] Checking date format
+2021-09-04 22:18:10 [INFO] All dates are ISO 8601 compliant (YYYY-mm-dd)
+2021-09-04 22:18:10 [INFO] Checking consistency of dates
+2021-09-04 22:18:10 [INFO] Dates are consistent. All dates are YYYY-mm-dd
+2021-09-04 22:18:10 [INFO] Check if all litter types in the type file are present in the data file
+2021-09-04 22:18:10 [INFO] All litter types are present
+2021-09-04 22:18:10 [INFO] Select only litter data
+2021-09-04 22:18:10 [WARN] The following columns will be excluded from analysis:'region_name', 'country_code', 'country_name', 'location_name', 'survey: old_rope_small [200]', 'survey: old_rope_large [201]', 'survey: old_plastic_pieces [202]', 'survey: old_gloves [203]', 'survey: old_cartons [204]', 'survey: old_oildrums_new [205]', 'survey: old_oildrums_old [206]', 'survey: old_human_faeces [207]', 'survey: old_animal_faeces [208]', 'survey: old_cloth_rope [210]' and 'survey: pellets [998]'
+2021-09-04 22:18:10 [INFO] Check for empty cells
+2021-09-04 22:18:10 [INFO] No empty cells found
+2021-09-04 22:18:10 [INFO] Check that litter counts are numbers
+2021-09-04 22:18:10 [INFO] Only numbers found
+2021-09-04 22:18:10 [INFO] Check that litter counts are nonnegative numbers
+2021-09-04 22:18:10 [INFO] No negative numbers found
+2021-09-04 22:18:10 [INFO] Check that litter counts are natural numbers
+2021-09-04 22:18:10 [INFO] Only natural numbers found
+2021-09-04 22:18:10 [INFO] Check if not all litter counts in a single survey (record) are zero
+2021-09-04 22:18:10 [INFO] No records found with only zero-counts
+2021-09-04 22:18:10 [INFO] Check for duplicated records
+2021-09-04 22:18:10 [INFO] No duplicated records found
+2021-09-04 22:18:10 [INFO] No records with the same location_code/date found
+2021-09-04 22:18:10 [INFO] Computing group totals
+2021-09-04 22:18:11 [INFO] Computing relative group totals (relative w.r.t. TC)
+2021-09-04 22:18:11 [INFO] Determining top 80% litter...
+2021-09-04 22:18:11 [INFO] Entering outlier analysis section
+2021-09-04 22:18:12 [INFO] Entering descriptive statistics section
+2021-09-04 22:18:12 [INFO] Creating table with litter statistics
+2021-09-04 22:18:13 [INFO] Table with litter statistics created
+2021-09-04 22:18:17 [INFO] Entering descriptive regional statistics section
+2021-09-04 22:18:17 [INFO] Creating table with regional litter statistics
+2021-09-04 22:18:21 [INFO] Entering trend analysis section
+2021-09-04 22:18:21 [INFO] Creating table with trend statistics
+2021-09-04 22:18:21 [INFO] Table with trend statistics created
+2021-09-04 22:18:21 [INFO] Creating time-series plots
+2021-09-04 22:18:27 [INFO] Entering regional trend analysis section
+2021-09-04 22:18:27 [INFO] Creating table with trend statistics
+2021-09-04 22:18:27 [INFO] Table with trend statistics created
+2021-09-04 22:18:27 [INFO] Creating regional time-series plots
+2021-09-04 22:18:30 [INFO] Adding session information.
+2021-09-04 22:18:30 [INFO] Report completed
+2021-09-04 22:18:30 [INFO] All results have been written to ‘litteR-results-20210904T221809’
+2021-09-04 22:18:30 [INFO] litteR session terminated

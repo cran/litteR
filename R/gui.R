@@ -54,7 +54,7 @@ litter <- function(filename = NULL) {
             )
         }
     }
-    
+
     # check if directory name contains a percentage sign '%'
     # A '%' will lead to errors when creating plots
     filename %>%
@@ -97,7 +97,7 @@ litter <- function(filename = NULL) {
         read_settings(logger) %>%
         c(file_settings = path_norm(filename))
     logger$info(str_glue("Settings file has been read"))
-    
+
     # add path to data file
     pars$file_data <- pars %>%
         chuck("file_data") %>%

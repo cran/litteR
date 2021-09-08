@@ -1,3 +1,8 @@
+pre {
+  overflow: hidden; /* Hide scrollbars */
+  word-break: break-word;
+}
+
 h1 {
    color: rgb(10%, 10%, 100%);
 }

@@ -8,31 +8,125 @@ editor_options:
 logger$info("Entering descriptive statistics section")
 ```
 
+<br/>
+<br/>
+
 ## Descriptive statistics
 
-For each spatial code and group/type name, the following statistics have been estimated for the period `r str_c(DATE_FROM, DATE_TO, sep = " to ")`:
+```{r, echo=FALSE}
+MIN_YEARS <- 5L
+MIN_SURVEYS <- 10L
+```
 
-- mean count (mean):, _i.e._, [the arithmetic mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of the counts for each litter type;
-- median count (median), _i.e._, the [median](https://en.wikipedia.org/wiki/Median) of the counts for each litter type;
-- relative count (%TC): the contribution of each litter type to the total count of litter types (%);
-- [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (CV): the ratio of the standard deviation to the mean of the counts for each litter type (%);
-- ratio of [MAD](https://en.wikipedia.org/wiki/Median_absolute_deviation) and [median](https://en.wikipedia.org/wiki/Median) (RMAD, %);
-- number of surveys (N);
-- [Theil-Sen slope](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) (slope): a robust non-parametric estimator of slope (litter counts / year);
-- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed [Mann-Kendall test](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) to test the null hypothesis of 
-    - no monotonically _increasing_ trend in case the Theil-Sen slope is greater than zero;
-    - no monotonically _decreasing_ trend in case the Theil-Sen slope is smaller than zero;
+The number of years and the number of surveys for each `location_code` should not be too small, otherwise the calculations in this report will be less reliable. In addition, the surveys should ideally also be evenly spread in time.
 
+Note that **litteR** does not enforce a minimum number of years or surveys. That is the responsibility of the user. As a guideline, we advise a minimum of `r MIN_YEARS` years and `r MIN_SURVEYS` surveys, evenly distributed in time.
+
+The table below gives the number of surveys and the number of years for each `location_code`.
+
+<br/>
+<br/>
+
+```{r}
+
+if (REGIONAL_ANALYSIS) {
+    d <- d_ltr %>%
+        filter(type_name == "TC") %>%
+        transmute(
+            region_code,
+            location_code,
+            date,
+            year = date %>%
+                format("%Y"))  %>%
+        group_by(region_code, location_code) %>%
+        summarise(
+            `number of years` = length(unique(year)),
+            `number of surveys` = n(),
+            .groups = "drop") 
+    d %>%
+        kable(align = "llrr")
+} else {
+    d <- d_ltr %>%
+        filter(type_name == "TC") %>%
+        transmute(
+            location_code,
+            date,
+            year = date %>%
+                format("%Y"))  %>%
+        group_by(location_code) %>%
+        summarise(
+            `number of years` = length(unique(year)),
+            `number of surveys` = n(),
+            .groups = "drop") 
+    d %>%
+        kable(align = "lrr")
+}
+```
+
+<br/>
+
+```{r}
+if (any(d %>% chuck("number of years") < MIN_YEARS)) {
+    location_code <- d %>%
+        filter(`number of years` < MIN_YEARS) %>%
+        chuck("location_code")
+    logger$warn(
+        str_glue("The number of years may be insufficient (<{MIN_YEARS} years) for: "),
+        location_code %>% sQuote %>% enumerate)
+}    
+if (any(d %>% chuck("number of surveys") < MIN_SURVEYS)) {
+    location_code <- d %>%
+        filter(`number of surveys` < MIN_SURVEYS) %>%
+        chuck("location_code")
+    logger$warn(
+        str_glue("The number of surveys may be insufficient (<{MIN_SURVEYS} surveys) for: "),
+        location_code %>% sQuote %>% enumerate)
+}    
+if (any(d %>% chuck("number of surveys") < 3L)) {
+    location_code <- d %>%
+        filter(`number of surveys` < 3L) %>%
+        chuck("location_code")
+    logger$warn(
+        "The number of surveys is insufficient (<3 surveys) to estimate the regional trend for: ",
+        location_code %>% sQuote %>% enumerate)
+}    
+
+```
+
+
+<br/>
+<br/>
+
+
+For each location code and group/type name, the following statistics have been estimated for the period `r str_c(DATE_FROM, DATE_TO, sep = " to ")`:
+
+-   mean count (`mean`):, *i.e.*, [the arithmetic mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of the counts for each litter type;
+
+-   median count (`median`), *i.e.*, the [median](https://en.wikipedia.org/wiki/Median) of the counts for each litter type;
+
+-   relative count (`%TC`): the contribution of each litter type to the total count of litter types (%);
+
+-   [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (`cv`): the ratio of the standard deviation to the mean of the counts for each litter type (%);
+
+-   ratio of [mad](https://en.wikipedia.org/wiki/Median_absolute_deviation) and [median](https://en.wikipedia.org/wiki/Median) (`rmad`, %);
+
+-   number of surveys (`n`);
+
+-   [Theil-Sen slope](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) (slope): a robust non-parametric estimator of slope (litter counts / year);
+
+-   [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed [Mann-Kendall test](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) to test the null hypothesis of
+
+    -   no monotonically *increasing* trend in case the Theil-Sen slope is greater than zero;
+    -   no monotonically *decreasing* trend in case the Theil-Sen slope is smaller than zero;
 
 These statistics will be estimated for types with the greatest counts making up `r PERCENTAGE_TOTAL_COUNT`% of the total count for each location and for all groups specified in `r sQuote(path_file(FILE_TYPES))`.
 
 > These statistics have been stored in file `r sQuote(path_file(FILE_STATS))`.
 
-
 ```{r}
 logger$info("Creating table with litter statistics")
 d_stats <- d_ltr %>%
-    group_by(spatial_code, type_name, topx) %>%
+    group_by(location_code, type_name, topx) %>%
     summarise(
         from = format(min(date)),
         to = format(max(date)),
@@ -49,13 +143,14 @@ d_stats <- d_ltr %>%
         b1 = ts %>%
           first %>%
           slope,
+        slope = b1 * 365.25,
         p_value = if_else(
             are_na(b1),
             NA_real_,
             if_else(
-                b1 >  0,
-                p_value(mann_kendall(count, "increasing")),
-                p_value(mann_kendall(count, "decreasing"))
+                b1 > 0,
+                p_value(mann_kendall(count, type = "increasing")),
+                p_value(mann_kendall(count, type = "decreasing"))
             )
         ),
         .groups = "drop") %>%
@@ -64,47 +159,61 @@ d_stats <- d_ltr %>%
 # store stats in a CSV-file
 d <- d_stats %>%
     filter(topx | are_na(topx)) %>% # only top x% or groups
-    mutate(slope = b1 * 365.25) %>%
-    mutate_if(is_double, signif, digits = 3) %>%
-    select(spatial_code, from, to, type_name,
+    select(location_code, from, to, type_name,
            rel_count, mean, median, cv, rmad, n, slope, p_value) %>%
-    arrange(spatial_code, desc(rel_count)) %>%
+    arrange(location_code, desc(rel_count)) %>%
     rename(`%TC` = rel_count)
 
 d %>%
+    rename(`type/group_name` = type_name) %>%
+    mutate(across(where(is_double) & !p_value, ~ formatC(.x, format = "fg", digits = 4))) %>%
+    mutate(p_value = formatC(p_value, format = "f", digits = 4)) %>%
+    mutate(across(where(is_character), ~ str_remove(.x, "^ +"))) %>%
     write_csv(FILE_STATS)
 
 logger$info("Table with litter statistics created")
 ```
 
-
 The statistics for the litter groups are given in the table below.
+
+<br/>
+<br/>
 
 ```{r}
 d %>%
     filter(type_name == str_to_upper(type_name)) %>% # group codes
     rename(group_code = type_name) %>%
-    mutate_if(is_double, formatC, format = "fg", digits = 4) %>%
-    kable()
+    mutate(across(where(is_double) & !p_value, ~ formatC(.x, format = "fg", digits = 4))) %>%
+    mutate(p_value = formatC(p_value, format = "f", digits = 4)) %>%
+    kable(align = "llllrrrrrrrr")
 ```
 
+<br/>
+<br/>
 
-The figures below show for each spatial code the median count for each group.
+The figures below show for each location code the median count for each group.
 
 ```{r fig.width=5, fig.height=5, out.width=449}
 d_stats %>%
-  select(spatial_code, type_name, median) %>%
-  filter(type_name == str_to_upper(type_name)) %>% # group codes
-  arrange(spatial_code, median) %>%
-  split(.$spatial_code) %>%
-  walk(function(x) {
-      x$type_name <- factor(x$type_name, levels = x$type_name, ordered = TRUE)
+    select(location_code, type_name, median) %>%
+    filter(type_name == str_to_upper(type_name)) %>% # group codes
+    arrange(location_code) %>%
+    split(.$location_code) %>%
+    walk(function(x) {
+        x$type_name <- x %>%
+            chuck("type_name") %>%
+            factor(
+                levels = d_type %>%
+                    chuck("group_code") %>%
+                    levels %>%
+                    rev,
+                ordered = TRUE)
       g <- ggplot(data = x) +
         geom_col(mapping = aes(x = type_name, y = median), fill = "blue", alpha = 0.5) +
         scale_x_discrete(name = "") +
         scale_y_continuous(name = "median count") +
         coord_flip() +
-        ggtitle(x$spatial_code[1])
+        ggtitle(x$location_code[1])
       print(g)
-  })
+    })
 ```

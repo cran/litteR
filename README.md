@@ -13,5 +13,5 @@ It is recommended to read the **litteR** User Manual carefully before you instal
 
 ## Note for MS-Windows users
 
-MS-Windows users need [RStudio](https://rstudio.com) to run **litteR**. Please consult the installation manual on [CRAN](https://CRAN.R-project.org/package=litteR) for more information.
+MS-Windows users need [RStudio](https://www.rstudio.com) to run **litteR**. Please consult the installation manual on [CRAN](https://CRAN.R-project.org/package=litteR) for more information.
 

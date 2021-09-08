@@ -8,6 +8,9 @@ editor_options:
 logger$info("Creating time-series plots")
 ```
 
+<br/>
+<br/>
+
 Time-series of the selected type names, group codes and and spatial codes are given in the plots below, including trend line and smoother.
 
 The lines and dots have the following meaning:
@@ -17,22 +20,30 @@ The lines and dots have the following meaning:
 - blue line: [loess-smoother](https://en.wikipedia.org/wiki/Local_regression). It is only given for 25 or more points;
 - red line: Theil-Sen trend line (its slope is given in the table above). It is only given for 5 or more points. However, it is recommended to use a minimum period of 4 to 5 years to obtain useful trend results.
 
-
+<br/>
+<br/>
+    
 ```{r fig.width=5, fig.height=3, out.width=449}
 d_ltr %>%
     filter(type_name %in% unique(c("TC", TYPE_NAME, GROUP_CODE))) %>%
-    filter(spatial_code %in% SPATIAL_CODE) %>%
+    filter(location_code %in% LOCATION_CODE) %>%
     left_join(
       d_stats %>%
-        select(spatial_code, type_name, b0, b1), 
-      by = c("spatial_code", "type_name")) %>%
-    group_by(spatial_code, type_name) %>%
-    group_split() %>%
+        select(location_code, type_name, b0, b1), 
+      by = c("location_code", "type_name")) %>%
+    group_split(location_code, type_name) %>%
     map_df(function(x) {
+        ymax <- CUTOFF_COUNT_AXIS / 100 * max(x$count)
+        n_extremes <- sum(x$count > ymax)
+        warn_message <- str_glue("NB: {n_extremes} largest counts are missing because only the lower {CUTOFF_COUNT_AXIS}% of the plot is given")
         g <- ggplot(data = x, mapping = aes(x = date, y = count)) +
-                geom_point() +
+                geom_point(na.rm = TRUE) +
                 scale_x_date(name = "", limits = c(DATE_FROM, DATE_TO)) +
-                ggtitle(str_c(x$spatial_code[1], x$type_name[1], sep = "  "))
+                coord_cartesian(ylim = c(NA, ymax)) +
+                ggtitle(
+                    label = str_c(x$location_code[1], x$type_name[1], sep = "  "),
+                    subtitle = if (CUTOFF_COUNT_AXIS < 100) {warn_message} else {waiver()}) +
+                theme(plot.subtitle = element_text(size = 8))
         if (nrow(x) >= 5L) {
             if (nrow(x) <= 24L) {
                 g <- g +        
@@ -54,10 +65,10 @@ d_ltr %>%
         }
         tibble(
             g = list(g), 
-            spatial_code = x$spatial_code[1], 
+            location_code = x$location_code[1], 
             type_name = x$type_name[1])
     }) %>%
-    arrange(spatial_code, type_name) %>%
+    arrange(location_code, type_name) %>%
     pull("g") %>%
     walk(print)
 ```

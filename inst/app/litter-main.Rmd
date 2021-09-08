@@ -1,7 +1,7 @@
 ---
 title:  | 
         | <font color="blue"> litteR - Analysis of Litter Data</font>
-        | <font size="1"><i> &copy; 2018-2020 D.J.J. Walvoort & W.M.G.M Van Loon. [MIT-license](https://opensource.org/licenses/MIT). `r sprintf("litteR version: %s (%s)", packageVersion("litteR"), packageDate("litteR"))`</i></font>
+        | <font size="1"><i> &copy; 2018-2021 D.J.J. Walvoort & W.M.G.M Van Loon. [MIT-license](https://opensource.org/licenses/MIT). `r sprintf("litteR version: %s (%s)", packageVersion("litteR"), packageDate("litteR"))`</i></font>
 date:   | 
         | `r format(Sys.time())`
         | 
@@ -65,8 +65,20 @@ params:
     label: "figure quality"
     value: "low"
     input: text
-  spatial_code:
-    label: "spatial code"
+  cutoff_count_axis:
+    label: "cutoff vertical count axis in plots"
+    value: 100
+    min: 1
+    max: 100 
+    step: 1
+    width: 200
+    input: numeric
+  location_code:
+    label: "location code"
+    value: ""
+    input: text
+  region_code:
+    label: "region code"
     value: ""
     input: text
   group_code:
@@ -122,6 +134,7 @@ opts_chunk$set(
     echo = FALSE,
     dpi = c(low = 72, high = 300)[FIGURE_QUALITY]
 )
+
 ```
 
 
@@ -148,22 +161,35 @@ DATE_TO <- params %>%
 PERCENTAGE_TOTAL_COUNT <- params %>%
   chuck("percentage_total_count")
 
-# spatial_code, type name, and group code
-SPATIAL_CODE <- params %>%
-  pluck("spatial_code")
+# location_code, type name, and group code
+LOCATION_CODE <- params %>%
+  pluck("location_code")
+REGION_CODE <- params %>%
+  pluck("region_code")
 TYPE_NAME <- params %>%
   pluck("type_name")
 GROUP_CODE <- params %>%
   pluck("group_code")
 
-if ((length(SPATIAL_CODE) == 1L) && (SPATIAL_CODE == "")) {
-    SPATIAL_CODE <- NULL
+if ((length(LOCATION_CODE) == 1L) && (LOCATION_CODE == "")) {
+    LOCATION_CODE <- NULL
+}
+if ((length(REGION_CODE) == 1L) && (REGION_CODE == "")) {
+    REGION_CODE <- NULL
 }
 if ((length(TYPE_NAME) == 1L) && (TYPE_NAME == "")) {
     TYPE_NAME <- NULL
 }
 if ((length(GROUP_CODE) == 1L) && (GROUP_CODE == "")) {
     GROUP_CODE <- NULL
+}
+
+# cutoff count axis in plots
+CUTOFF_COUNT_AXIS <- params %>%
+    pluck("cutoff_count_axis", .default = 100)
+
+if (!(CUTOFF_COUNT_AXIS %>% between(0, 100))) {
+    logger$error("cutoff count axis in YAML-file should be between 0% and 100%")
 }
 
 ```
@@ -186,10 +212,12 @@ This report can best be viewed with the latest versions of web browsers like Goo
     - settings: `r sQuote(path_file(FILE_SETTINGS))`
     - data: `r sQuote(path_file(FILE_DATA))`
     - types: `r sQuote(path_file(FILE_TYPES))`
-- spatial codes: `r if (is_null(SPATIAL_CODE)) {"not specified"} else {enumerate(sQuote(SPATIAL_CODE))}`
+- location codes: `r if (is_null(LOCATION_CODE)) {"not specified"} else {enumerate(sQuote(LOCATION_CODE))}`
+- region codes: `r if (is_null(REGION_CODE)) {"not specified"} else {enumerate(sQuote(REGION_CODE))}`
 - group codes: `r if (is_null(GROUP_CODE)) {"not specified"} else {enumerate(sQuote(GROUP_CODE))}`
 - type names: `r if (is_null(TYPE_NAME)) {"not specified"} else {enumerate(sQuote(TYPE_NAME))}`
 - figure quality: `r sQuote(FIGURE_QUALITY)`
+- cutoff count axis in plots: `r CUTOFF_COUNT_AXIS`%
 
 
 
@@ -217,11 +245,15 @@ d_ltr <- FILE_DATA %>%
   read_litter(logger, type_names = d_type %>% pull("type_name")) %>%
   filter(date %>% between(DATE_FROM, DATE_TO))
 
-if ((nrow(d_ltr) == 0)) {
+if ((nrow(d_ltr) == 0L)) {
   logger$error("No data available in the period settings between {DATE_FROM} and {DATE_TO}")
 }
 ```
 
+```{r}
+# regional analysis requested?
+REGIONAL_ANALYSIS <- "region_code" %in% names(d_ltr)
+```
 
 ```{r}
 
@@ -234,7 +266,7 @@ d_grp <- d_type %>%
       filter(group_code == x) %>%
       select(type_name) %>%
       left_join(d_ltr, by = "type_name") %>%
-      group_by(spatial_code, date, .RECORD_ID) %>%
+      group_by(location_code, date, .RECORD_ID) %>%
       summarise(count = sum(count), .groups = "drop") %>%
       filter(!are_na(count)) %>%
       mutate(type_name = x)})
@@ -242,64 +274,80 @@ d_grp <- d_type %>%
 logger$info(str_glue("Computing relative group totals (relative w.r.t. TC)"))
 d_grp <- d_grp %>% 
   filter(type_name == "TC") %>%
-  select(spatial_code, date, .RECORD_ID, TC = count) %>%
-  right_join(d_grp, by = c("spatial_code", "date", ".RECORD_ID")) %>%
+  select(location_code, date, .RECORD_ID, TC = count) %>%
+  right_join(d_grp, by = c("location_code", "date", ".RECORD_ID")) %>%
   mutate(rel_count = 100 * count / TC) %>%
   select(-TC)
 
 logger$info(str_glue("Determining top {PERCENTAGE_TOTAL_COUNT}% litter..."))
 d <- d_grp %>%
   filter(type_name == "TC") %>%
-  select(spatial_code, date, TC = count) %>%
-  group_by(spatial_code) %>%
+  select(location_code, date, TC = count) %>%
+  group_by(location_code) %>%
   summarise(sum_TC = sum(TC), .groups = "drop") %>%
-  left_join(d_ltr, by = "spatial_code") %>%
-  group_by(spatial_code, sum_TC, type_name) %>%
+  left_join(d_ltr, by = "location_code") %>%
+  group_by(location_code, sum_TC, type_name) %>%
   summarise(sum_count = sum(count), .groups = "drop") %>%
-  arrange(spatial_code, desc(sum_count)) %>%
-  group_by(spatial_code) %>%
+  arrange(location_code, desc(sum_count)) %>%
+  group_by(location_code) %>%
   mutate(rel_count = 100 * cumsum(sum_count) / sum_TC) %>%
   mutate(topx = rel_count < (PERCENTAGE_TOTAL_COUNT + 0.001)) %>%
   ungroup %>%
-  select(spatial_code, type_name, topx)
+  select(location_code, type_name, topx)
 
 # adding relative counts to litter types
 d_ltr <- d_grp %>%
   filter(type_name == "TC") %>%
-  select(spatial_code, date, .RECORD_ID, TC = count) %>%
-  right_join(d_ltr, by = c("spatial_code", "date", ".RECORD_ID")) %>%
+  select(location_code, date, .RECORD_ID, TC = count) %>%
+  right_join(d_ltr, by = c("location_code", "date", ".RECORD_ID")) %>%
   mutate(rel_count = 100 * count / TC) %>%
   select(-TC) %>%
-  arrange(spatial_code, date, desc(rel_count)) 
+  arrange(location_code, date, desc(rel_count)) 
 
 # adding topx% to litter types
 d_ltr <- d_ltr %>%
-  left_join(d, by = c("spatial_code", "type_name"))
+  left_join(d, by = c("location_code", "type_name"))
 
 # adding litter types to litter groups
 d_ltr <- d_ltr %>%
   bind_rows(d_grp)
 
+# add region_code to litter groups
+lut <- d_ltr %>%
+    distinct(location_code, region_code) %>%
+    filter(!are_na(region_code))
+d_ltr <- d_ltr %>%
+    select(-region_code) %>%
+    left_join(lut, by = "location_code")
+
 ```
 
 
 
-
-<br/>
-<br/>
 ```{r, child=system.file("app", "litter-outlier.Rmd", package = "litteR")}
 ```
 
-<br/>
-<br/>
 ```{r, child=system.file("app", "litter-stats.Rmd", package = "litteR")}
 ```
 
-<br/>
-<br/>
+```{r, child=system.file("app", "litter-stats-regional.Rmd", package = "litteR"), eval=isTRUE(REGIONAL_ANALYSIS)}
+```
+
+```{r, child=system.file("app", "litter-no-regional-analysis.Rmd", package = "litteR"), eval=!isTRUE(REGIONAL_ANALYSIS)}
+```
+
 ```{r, child=system.file("app", "litter-trend.Rmd", package = "litteR")}
 ```
 
+```{r, child=system.file("app", "litter-trend-regional.Rmd", package = "litteR"), eval=isTRUE(REGIONAL_ANALYSIS)}
+```
+
+```{r, child=system.file("app", "litter-no-regional-trend-analysis.Rmd", package = "litteR"), eval=!isTRUE(REGIONAL_ANALYSIS)}
+```
+
+
+<br/>
+<br/>
 
 ## Session Information
 

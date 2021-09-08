@@ -1,3 +1,7 @@
+# prevent notes by R CMD check
+globalVariables(c("s", "v", "Z"))
+
+
 #' p-value
 #'
 #' Extract p-value.
@@ -63,9 +67,10 @@ intercept <- function(x, ...) {
 
 #' Mann Kendall
 #'
-#' Performs Mann-Kendall non-parametric trend test.
+#' Performs Mann-Kendall non-parametric test for trend.
 #'
 #' @param x numeric vector representing a time-series.
+#' @param t time index
 #' @param type direction to test (both, increasing, or decreasing).
 #'
 #' @return object of class \code{Mann-Kendall}.
@@ -73,19 +78,22 @@ intercept <- function(x, ...) {
 #' @export
 #'
 #' @seealso \code{\link{test_statistic}}, \code{\link{p_value}},
-#'   \code{\link{cor.test}}
+#'   \code{\link{cor.test}}, \code{\link{regional_kendall}}
 #'
 #' @examples
 #'
 #' # create mann_kendall object
 #' mk <- mann_kendall(c(9, 4, 7, 5, 3), type = "decreasing")
-mann_kendall <- function(x, type = c("both", "increasing", "decreasing")) {
+mann_kendall <- function(x, t = seq_along(x),
+                         type = c("both", "increasing", "decreasing")) {
+    n <- length(x)
+    stopifnot(length(t) == n)
     result <- list(
         p_value = NA_real_,
         tau = NA_real_
     )
     class(result) <- "mann_kendall"
-    if (length(x) >= 2L) {
+    if (n >= 2L) {
         type <- match.arg(type)
         alternative <- switch(type,
             both = "two.sided",
@@ -94,7 +102,7 @@ mann_kendall <- function(x, type = c("both", "increasing", "decreasing")) {
         )
         mk <- suppressWarnings(
             cor.test(
-                x = seq_along(x),
+                x = t,
                 y = x,
                 alternative = alternative,
                 method = "kendall"
@@ -108,7 +116,7 @@ mann_kendall <- function(x, type = c("both", "increasing", "decreasing")) {
 
 #' @export
 print.mann_kendall <- function(x, ...) {
-    cat("Object of class", class(x), "\n")
+    cat("Object of class", sQuote(class(x)), "\n")
     cat("tau:", test_statistic(x), "\n")
     cat("p-value:", p_value(x), "\n")
 }
@@ -181,7 +189,7 @@ theil_sen <- function(x, y, ...) {
         N <- 0.5 * n * (n - 1L)
         slope <- rep.int(NA_real_, times = N)
         k <- 0L
-        for (i in 1:(n - 1)) {
+        for (i in seq_len(n - 1)) {
             for (j in (i + 1):n) {
                 dx <- x[j] - x[i]
                 if (dx > .Machine$double.eps) {
@@ -245,7 +253,13 @@ intercept.theil_sen <- function(x, ...) {
 #' @importFrom stats sd
 #' @export
 cv <- function(x, na.rm = FALSE) {
-    sd(x, na.rm = na.rm) / mean(x, na.rm = na.rm)
+    d <- mean(x, na.rm = na.rm)
+    if (d == 0) {
+        return(NA_real_)
+    }
+    n <- sd(x, na.rm = na.rm)
+    return(n / d)
+    
 }
 
 #' Relative Median Absolute Deviation
@@ -261,7 +275,12 @@ cv <- function(x, na.rm = FALSE) {
 #' @importFrom stats mad median
 #' @export
 rmad <- function(x, na.rm = FALSE) {
-    mad(x, na.rm = na.rm) / median(x, na.rm = na.rm)
+    d <- median(x, na.rm = na.rm)
+    if (d == 0) {
+        return(NA_real_)
+    }
+    n <- mad(x, na.rm = na.rm)
+    return(n / d)
 }
 
 
@@ -615,8 +634,186 @@ stat_adj_boxplot <- function() {
 #' @export
 stat_adj_boxplot_outlier <- function() {
     outlier <- function(x) {
+        if (length(x) == 1) {
+            return(NA_real_)
+        }
         s <- adj_boxplot_stats(x)
         x[x < s["ymin"] | x > s["ymax"]]
     }
-    stat_summary(fun = outlier, geom = "point")
+    stat_summary(fun = outlier, geom = "point", na.rm = TRUE)
+}
+
+
+
+#' Mann-Kendall S Statistic
+#' 
+#' @param x observations
+#' @param t time index
+#'
+#' @references Gilbert, R.O., 1987. Statistical methods for environmental
+#' pollution monitoring.
+#' 
+#' @seealso \code{\link{kendall_var_s}}
+#'
+#' @export
+kendall_s <- function(x, t = seq_along(x)) {
+    stopifnot(length(x) == length(t))
+    o <- order(t)
+    x <- x[o]
+    t <- t[o]
+    n <- length(x)
+    if (n == 1L) {
+        # corner case (same return type as 'sign')
+        return(NA_real_)
+    }
+    s <- 0
+    for (i in seq_len(n - 1)) {
+        for (j in (i + 1):n) {
+            if (t[i] != t[j]) {
+                s <- s + sign(x[j] - x[i])
+            }
+        }
+    }
+    return(s)
+}
+
+
+
+#' Mann-Kendall Variance of S Statistic
+#' 
+#' @param x observations
+#' @param t time index
+#'
+#' @references Gilbert, R.O., 1987. Statistical Methods for Environmental
+#' Pollution Monitoring.
+#' @references Van Belle and Hughes, 1984, Nonparametric Tests for Trend in 
+#' Water Quality. Water Resources Research 20:127-136
+#'
+#' @export
+kendall_var_s <- function(x, t = seq_along(x)) {
+
+    # check arguments
+    n <- length(x)
+    stopifnot(length(t) == n)
+
+    # handle corner cases
+    if (n < 3L) {
+        return(NA_real_)
+    }
+
+    # make sure that vectors are ordered
+    o <- order(t)
+    x <- x[o]
+    t <- t[o]
+
+    # utility functions
+    d <- function(x) {
+        x * (x - 1)
+    }
+    e <- function(x) {
+        d(x) * (x - 2)
+    }
+    f <- function(x) {
+        d(x) * (2 * x + 5)
+    }
+
+    # initialize var S
+    s <- f(n)
+
+    # tied values correction
+    tp <- tapply(x, x, length)
+    tp <- tp[tp > 1L]
+    g <- length(tp)
+    for (i in seq_len(g)) {
+        s <- s - f(tp[i])
+    }
+    
+    # multiple data correction
+    uq <- tapply(t, t, length)
+    uq <- uq[uq > 1L]
+    h <- length(uq)
+    for (i in seq_len(h)) {
+        s <- s - f(uq[i])
+    }
+
+    s <- as.double(s) / 18 +
+        (sum(e(tp)) * sum(e(uq))) /
+            (9 * e(n)) +
+        (sum(d(tp)) * sum(d(uq))) /
+            (2 * d(n))
+
+    return(as.double(s))
+}
+
+
+
+#' Regional Kendall Test for Trend
+#' 
+#' Performs Regional Kendall non-parametric test for trend.
+#' 
+#' @param x observations
+#' @param t time index
+#' @param r region index
+#' @param type direction to test (both, increasing, or decreasing).
+#' 
+#' @importFrom dplyr tibble "%>%" summarise mutate if_else
+#' @importFrom stats pnorm
+#' 
+#' @seealso \code{\link{mann_kendall}}
+#'
+#' @references Gilbert, R.O., 1987. Statistical methods for environmental
+#' pollution monitoring.
+#' 
+#' @export
+regional_kendall <- function(x, t = seq_along(x), r = rep.int(1, length(x)),
+                             type = c("both", "increasing", "decreasing")) {
+    type <- match.arg(type)
+    n <- length(x)
+    stopifnot(length(t) == n)
+    stopifnot(length(r) == n)
+    result <- tibble(x, t, r) %>%
+        group_by(r) %>%
+        summarise(
+            s = kendall_s(x, t),
+            v = kendall_var_s(x, t),
+            .groups = "drop") %>%
+        summarise(
+            s = sum(s),
+            v = sum(v)) %>%
+        mutate(
+            Z = if_else(s == 0, 0, (s - sign(s)) / sqrt(v)),
+            p_value = switch(
+                type,
+                    "decreasing" = pnorm(Z),
+                    "increasing" = pnorm(Z, lower.tail = FALSE),
+                    2 * pnorm(-abs(Z)))) %>%
+        as.list
+    class(result) <- "regional_kendall"
+    return(result)
+}
+
+
+#' @export
+print.regional_kendall <- function(x, ...) {
+    cat("Object of class", sQuote(class(x)), "\n")
+    cat("Z:", test_statistic(x), "\n")
+    cat("p-value:", p_value(x), "\n")
+}
+
+
+#' @describeIn regional_kendall Extracts Regional Kendall Z
+#'
+#' @export
+test_statistic.regional_kendall <- function(x, ...) {
+    x$Z
+}
+
+
+#' @describeIn regional_kendall Extract Regional Kendall p-value
+#'
+#' @param \dots further arguments passed to or from other methods.
+#'
+#' @export
+p_value.regional_kendall <- function(x, ...) {
+    x$p_value
 }

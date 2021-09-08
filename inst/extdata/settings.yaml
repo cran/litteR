@@ -7,14 +7,24 @@ date_max: 2017-12-31
 # Percentage of total count to analyse (0 < percentage_total_count <= 100)
 percentage_total_count: 80
 
-# Data file. Note: the datafile must be in the same path as the settings file
+# Data file.
+# Note: the datafile must be in the same path as the settings file
+# Note: the file extension should be .csv
 file_data: beach-litter-nl-2012-2017.csv
 
 # Type file. Defines the types and their groups
 file_types: types-ospar.csv
 
 # Select trend figures to plot in the report
-spatial_code: ["Noordwijk", "Terschelling"]
+# Note: this can be zero, one, or more than one location_code, region_code,
+# group_code, and/or type_name
+location_code: ["NL001", "NL004"]
+region_code: ["NL"]
 group_code: ["TC", "SUP", "FISH"]
 type_name: ["Plastic: Bags [2]"]
-figure_quality: low
+
+# figure quality (high or low)
+figure_quality: high
+
+# cutoff value vertical axis with litter counts (percentage)
+cutoff_count_axis: 100

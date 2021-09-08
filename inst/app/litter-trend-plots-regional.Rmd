@@ -1,0 +1,53 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+logger$info("Creating regional time-series plots")
+```
+
+Time-series of the selected type names and group codes are given for the selected regions in the plots below (see also [Settings]). The lines and dots have the following meaning:
+
+- coloured dots: observations;
+- red line: Regional Theil-Sen trend line (its slope is given in the table above). Note that the trend line (red line) is only given in case there are at least three records (surveys) in each `location_code` to estimate the trend parameters.
+
+
+```{r fig.width=5, fig.height=3, out.width=449}
+d_ltr %>%
+    filter(type_name %in% unique(c("TC", TYPE_NAME, GROUP_CODE))) %>%
+    filter(region_code %in% REGION_CODE) %>%
+    left_join(
+      d_stats_reg %>%
+        select(region_code, type_name, b0, b1), 
+      by = c("region_code", "type_name")) %>%
+    group_split(region_code, type_name) %>%
+    map_df(function(x) {
+        d <- tibble(date = range(x$date)) %>%
+            mutate(count = x$b0[1] + x$b1[1] * as.numeric(date))
+        ymax <- CUTOFF_COUNT_AXIS / 100 * max(x$count)
+        n_extremes <- sum(x$count > ymax)
+        warn_message <- str_glue("NB: {n_extremes} largest counts are missing because only the lower {CUTOFF_COUNT_AXIS}% of the plot is given")
+        g <- ggplot(data = x, mapping = aes(x = date, y = count)) +
+                geom_point(na.rm = TRUE) +
+                geom_path(
+                    data = d, 
+                    mapping = aes(x = date, y = count),
+                    colour = "red", size = 1.0,
+                    na.rm = TRUE) +
+                scale_x_date(name = "", limits = c(DATE_FROM, DATE_TO)) +
+                coord_cartesian(ylim = c(NA, ymax)) +
+                ggtitle(
+                    label = str_c(x$region_code[1], x$type_name[1], sep = "  "),
+                    subtitle = if (CUTOFF_COUNT_AXIS < 100){warn_message} else {waiver()}) +
+                theme(plot.subtitle = element_text(size = 8))
+        tibble(
+            g = list(g),
+            region_code = x$region_code[1], 
+            type_name = x$type_name[1])
+    }) %>%
+    arrange(region_code, type_name) %>%
+    pull("g") %>%
+    walk(print)
+```

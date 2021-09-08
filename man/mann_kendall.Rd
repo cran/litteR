@@ -6,7 +6,7 @@
 \alias{p_value.mann_kendall}
 \title{Mann Kendall}
 \usage{
-mann_kendall(x, type = c("both", "increasing", "decreasing"))
+mann_kendall(x, t = seq_along(x), type = c("both", "increasing", "decreasing"))
 
 \method{test_statistic}{mann_kendall}(x, ...)
 
@@ -14,6 +14,8 @@ mann_kendall(x, type = c("both", "increasing", "decreasing"))
 }
 \arguments{
 \item{x}{numeric vector representing a time-series.}
+
+\item{t}{time index}
 
 \item{type}{direction to test (both, increasing, or decreasing).}
 
@@ -23,7 +25,7 @@ mann_kendall(x, type = c("both", "increasing", "decreasing"))
 object of class \code{Mann-Kendall}.
 }
 \description{
-Performs Mann-Kendall non-parametric trend test.
+Performs Mann-Kendall non-parametric test for trend.
 }
 \section{Methods (by generic)}{
 \itemize{
@@ -45,5 +47,5 @@ p_value(mk)
 }
 \seealso{
 \code{\link{test_statistic}}, \code{\link{p_value}},
-  \code{\link{cor.test}}
+  \code{\link{cor.test}}, \code{\link{regional_kendall}}
 }

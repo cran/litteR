@@ -1,0 +1,93 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+logger$info("Entering regional trend analysis section")
+```
+
+<br/>
+<br/>
+
+## Regional trend analysis
+
+For each region_code and the type names and group codes specified in the settings file, the following statistics have been estimated for the period `r str_c(DATE_FROM, " to ", DATE_TO)`:
+
+- the number of surveys (N);
+- Theil-Sen slope: the median of all [Theil-Sen slopes](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) within a region;
+- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed Regional Kendall test ([Van Belle & Hughes, 1984](http://dx.doi.org/10.1029/WR020i001p00127); [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring)) to test the null hypothesis of 
+    - no monotonically _increasing_ trend in case the regional Theil-Sen slope is greater than zero;
+    - no monotonically _decreasing_ trend in case the regional Theil-Sen slope is smaller than zero;
+
+A p-value less than an _a priori_ specified [significance level](https://en.wikipedia.org/wiki/Statistical_significance) (_e.g._, often &alpha; = 0.05), indicates a significant trend. If the p-value is greater than this significance level, we can't say that there is no trend. We can only conclude that our data do not show evidence for a significant trend (due to lack of data, noise, etc.).
+
+The Regional Kendall test is a non-parametric test and as such does not make distributional assumptions on the data.
+
+Note that the trend statistics can only be computed if all `location_code`s of a `region_code` have at least three records (surveys). If that is not the case, the table below contains `NA`.
+
+<br/>
+<br/>
+
+```{r}
+# check region_codes
+missing_region_codes <- REGION_CODE %>%
+  setdiff(unique(d_stats_reg$region_code))
+if (length(missing_region_codes) > 0) {
+    logger$warn("The following specified region code(s) are not found and will be skipped: ",
+        missing_region_codes %>% sQuote %>% enumerate)
+}
+REGION_CODE <- d_stats_reg %>%
+    chuck("region_code") %>% 
+    unique %>%
+    intersect(REGION_CODE)
+
+# check type names
+missing_type_names <- TYPE_NAME %>%
+  setdiff(unique(d_stats_reg$type_name))
+if (length(missing_type_names) > 0) {
+    logger$warn("The following specified type name(s) are not found and will be skipped: ",
+        missing_type_names %>% sQuote %>% enumerate)
+}
+TYPE_NAME <- d_stats_reg %>%
+    chuck("type_name") %>% 
+    unique %>%
+    intersect(TYPE_NAME)
+
+# check group codes
+missing_group_codes <- GROUP_CODE %>%
+  setdiff(unique(d_stats_reg$type_name))
+if (length(missing_group_codes) > 0) {
+    logger$warn("The following specified group code(s) are not found and will be skipped: ",
+        missing_group_codes %>% sQuote %>% enumerate)
+}
+GROUP_CODE <- d_stats_reg %>%
+    chuck("type_name") %>% 
+    unique %>%
+    intersect(GROUP_CODE)
+```
+
+```{r}
+logger$info("Creating table with trend statistics")
+d_stats_reg %>%
+    filter(type_name %in% unique(c("TC", TYPE_NAME, GROUP_CODE))) %>%
+    select(region_code, type_name, N = n, slope, `p-value` = p_value) %>%
+    arrange(region_code, desc(abs(slope))) %>%
+    rename(`type name / group code` = type_name) %>%
+    mutate(
+        slope = slope %>%
+            formatC(format = "fg", digits = 4),
+        `p-value` = `p-value` %>%
+            formatC(format = "f",  digits = 4)) %>%
+    kable(align = "llrrr")
+logger$info("Table with trend statistics created")
+```
+
+<br/>
+<br/>
+```{r eval=length(REGION_CODE) == 0L}
+  logger$info("No valid region_code(s) found. Therefore, time-series plot are skipped")
+```
+
+```{r, child=system.file("app", "litter-trend-plots-regional.Rmd", package = "litteR"), eval=length(REGION_CODE) != 0L}
+```
