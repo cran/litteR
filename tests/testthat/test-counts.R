@@ -20,7 +20,7 @@ test_that("counts are computed correctly", {
     d <- d[order(d$location_code),]
 
     # check results
-    # reference values have been calculated by using spread sheet
+    # reference values have been calculated by using spreadsheet
     # 'testthat-manual-beach-litter-nl-2012-2017.ods'
     expect_equal(
         d[d$`type/group_name` == "TC", "mean"][[1]],
@@ -56,7 +56,7 @@ test_that("counts are computed correctly", {
     d$mean <- round(d$mean)
 
     # check results
-    # reference values have been calculated by using spread sheet
+    # reference values have been calculated by using spreadsheet
     # 'testthat-manual-beach-litter-nl-2012-2017.ods'
     expect_equal(
         d[d$`type/group_name` == "TC", "mean"][[1]],
@@ -98,7 +98,7 @@ test_that("counts are computed correctly", {
     d$mean <- round(d$mean)
     
     # check results
-    # reference values have been calculated by using spread sheet
+    # reference values have been calculated by using spreadsheet
     # 'testthat-manual-beach-litter-nl-2012-2017.ods'
     expect_equal(
         d[d$`type/group_name` == "TC", "mean"][[1]],

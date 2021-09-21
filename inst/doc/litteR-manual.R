@@ -10,9 +10,6 @@ library(readr)
 library(fs)
 library(kableExtra)
 
-## ---- out.width=650, fig.align="center"---------------------------------------
-knitr::include_graphics("./fig/beach-litter-cover-photo.jpg")
-
 ## ---- out.width=450, fig.align="center"---------------------------------------
 knitr::include_graphics("./fig/histogram-litter.png")
 

@@ -1,7 +1,11 @@
 ---
-title: "litteR User Manual"
+title: litteR User Manual
 author: 'Dennis Walvoort <font size="1">Wageningen Environmental Research, The Netherlands</font><br>Willem van Loon <font size="1"> Rijkswaterstaat, The Netherlands</font>'
-date: "`r Sys.Date()`"
+date: |
+    `r format(Sys.Date(), "%B %Y")`
+    <br><br><br>
+    `r knitr::include_graphics("./fig/beach-litter-cover-photo.png", dpi=96)`
+    <br><br><br>
 fontsize: 11pt
 output:
   rmarkdown::html_vignette:
@@ -27,12 +31,6 @@ library(readr)
 library(fs)
 library(kableExtra)
 ```
-
-
-```{r, out.width=650, fig.align="center"}
-knitr::include_graphics("./fig/beach-litter-cover-photo.jpg")
-```
-
 
 <br>
 <br>
@@ -580,10 +578,12 @@ The runtime error messages and the log file should provide you with clear inform
 # References
 
 Gilbert, R.O., 1987. Statistical Methods for Environmental Pollution Monitoring. Van Nostrand Reinhold. 320 pp
+https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring
 
-Hanke G., Walvoort D., van Loon W., Addamo A.M., Brosich A., del Mar Chaves Montero M., Molina Jack M.E., Vinci M., Giorgetti A., EU Marine Beach Litter Baselines, EUR 30022 EN, Publications Office of the European Union, Luxemburg, 2019, ISBN 978-92-76-14243-0, doi: 10.2760/16903, JRC114129.
+Hanke G., Walvoort D., van Loon W., Addamo A.M., Brosich A., del Mar Chaves Montero M., Molina Jack M.E., Vinci M., Giorgetti A., EU Marine Beach Litter Baselines, EUR 30022 EN, Publications Office of the European Union, Luxemburg, 2019, ISBN 978-92-76-14243-0, https://doi.org/10.2760/16903, JRC114129.
 
 Schulz, M., van Loon, W., Fleet, D. M., Baggelaar, P., & van der Meulen, E. (2017). OSPAR standard method and software for statistical analysis of beach litter data. Marine pollution bulletin, 122(1-2), 166-175.
+https://doi.org/10.1016/j.marpolbul.2017.06.045
 
 Schulz, Marcus, Dennis J.J. Walvoort, Jon Barry, David M. Fleet, Willem M.G.M. van Loon, 2019. Baseline and power analyses for the assessment of beach litter reductions in the European OSPAR region. _Environmental Pollution_ 248:555-564. https://doi.org/10.1016/j.envpol.2019.02.030
 

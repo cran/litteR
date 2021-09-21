@@ -1,3 +1,9 @@
+# litteR 0.9.1 (2021-09-21)
+
+* minor updates to vignette (cover page and DOI)
+
+
+
 # litteR 0.9.0 (2021-09-08)
 
 * added regional Kendall for trend analysis
