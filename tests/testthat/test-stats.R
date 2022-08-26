@@ -6,9 +6,34 @@ test_that("Tukeys trimean is correct", {
 
 
 test_that("Mann Kendall is correct", {
+    # single argument
     x <- c(12, 8, 9, 4, 7, 5, 3, 1)
     mk <- mann_kendall(x, type = "decreasing")
     ct <- cor.test(seq_along(x), x, alternative = "less", method = "kendall")
+    expect_equivalent(test_statistic(mk), ct$estimate)
+    expect_equal(p_value(mk), ct$p.value)
+
+    # two arguments (random order)
+    x <- c(12, 8, 9, 4, 7, 5, 3, 1)
+    t <- seq(
+        from = as.Date("2022-04-04"),
+        to = as.Date("2022-04-11"),
+        by = "day")
+    o <- sample(seq_along(x))
+    t <- t[o]
+    x <- x[o]
+    mk <- mann_kendall(x = x, t = t, type = "decreasing")
+    expect_equivalent(test_statistic(mk), ct$estimate)
+    expect_equal(p_value(mk), ct$p.value)
+    
+    # irregular time steps
+    x <- c(12, 8, 9, 4, 7, 5, 3, 1)
+    t <- seq(
+        from = as.Date("2022-01-01"),
+        to = as.Date("2022-12-31"),
+        by = "day")
+    t <- sort(sample(t, size = length(x), replace = FALSE))
+    mk <- mann_kendall(x = x, t = t, type = "decreasing")
     expect_equivalent(test_statistic(mk), ct$estimate)
     expect_equal(p_value(mk), ct$p.value)
 })

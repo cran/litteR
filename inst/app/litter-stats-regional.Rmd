@@ -56,6 +56,8 @@ d_stats_reg <- d_stats_reg %>%
 
 ## Regional descriptive statistics
 
+### Basic statistics
+
 The regional statistics for the litter groups are given in the table below. They all (except for the p-value) have been estimated in a stepwise fashion:
 
 1. compute the statistic for each individual location within a specific region (see also previous section);
@@ -73,7 +75,7 @@ The statistics are:
 
 - `slope`: the median of the Theil-Sen slopes of the individual beaches within a region for each litter group. Data from different beaches have not been mixed in the computation of the Theil-Sen slopes. This method is similar to the one in Gilbert (1987) except that in our procedure all beaches within a region contribute equally to the regional trend.
 
-- `p_value`: the p-values for each regional trend (`slope`) are computed by means of the expressions given in [Van Belle & Hughes, 1984](http://dx.doi.org/10.1029/WR020i001p00127) (Eqs. 2 and 7) and [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring) (Eqs. 17.1 - 17.5).
+- `p-value`: the p-values for each regional trend (`slope`) are computed by means of the expressions given in [Van Belle & Hughes, 1984](https://dx.doi.org/10.1029/WR020i001p00127) (Eqs. 2 and 7) and [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring) (Eqs. 17.1 - 17.5).
 
 The trend statistics can only be computed if all `location_code`s of a `region_code` have at least three records (surveys). If that is not the case, the table below contains `NA`.
 
@@ -88,5 +90,57 @@ d_stats_reg %>%
     arrange(region_code, desc(median)) %>%
     mutate(across(where(is_double) & !p_value, ~ formatC(.x, format = "fg", digits = 4))) %>%
     mutate(p_value = formatC(p_value, format = "f", digits = 4)) %>%
+    rename(`p-value` = p_value) %>%
     kable(align = "llrrrrr")
+```
+
+<br/>
+<br/>
+
+### Top 10
+
+The table below gives for each region the top 10 of litter types, _i.e._, the 10 litter types with the highest median litter counts.
+
+```{r}
+logger$info("Creating table with top 10 of litter types for each region")
+
+d <- d_stats_reg %>%
+    select(region_code, type_name, median) %>%
+    filter(type_name != str_to_upper(type_name)) %>% # remove group codes
+    group_split(region_code) %>%
+    map_df(function(x) {
+        x %>%
+            arrange(desc(median)) %>%
+            slice(1:10) %>%
+            mutate(rank = 1:n())}) %>%
+    select(region_code, rank, type_name, `median count` = median) 
+
+d %>%
+    kable(align = "lllr", digits = 1)
+```
+
+<br/>
+<br/>
+
+The figure(s) below show(s) for each region the top 10 of litter types.
+
+```{r fig.width=4, fig.height=3, out.width="50%"}
+logger$info("Creating figures with top 10 of litter types for each region")
+
+d %>%
+    group_split(region_code) %>%
+    walk(function(x) {
+        x$type_name <- factor(
+            x = x$type_name,
+            levels = rev(x$type_name),
+            ordered = TRUE)
+        g <- ggplot(data = x) +
+            geom_col(
+                mapping = aes(x = type_name, y = `median count`),
+                fill = "blue", alpha = 0.5) +
+            scale_x_discrete(name = "") +
+            coord_flip() +
+            ggtitle(x$region_code[1])
+        print(g)
+    })
 ```

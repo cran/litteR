@@ -19,9 +19,9 @@ Generic function for enumerating objects
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{numeric}: enumerate \code{numeric} vector.
-}}
+\item \code{enumerate(numeric)}: enumerate \code{numeric} vector.
 
+}}
 \seealso{
 \code{\link{enumerate.character}}
 }

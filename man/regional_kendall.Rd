@@ -33,11 +33,11 @@ Performs Regional Kendall non-parametric test for trend.
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{test_statistic}: Extracts Regional Kendall Z
+\item \code{test_statistic(regional_kendall)}: Extracts Regional Kendall Z
 
-\item \code{p_value}: Extract Regional Kendall p-value
+\item \code{p_value(regional_kendall)}: Extract Regional Kendall p-value
+
 }}
-
 \references{
 Gilbert, R.O., 1987. Statistical methods for environmental
 pollution monitoring.

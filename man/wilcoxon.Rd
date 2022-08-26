@@ -29,11 +29,11 @@ Constructor for a Wilcoxon test (simple wrapper for \code{\link{wilcox.test}}).
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{test_statistic}: Extract test statistic V
+\item \code{test_statistic(wilcoxon)}: Extract test statistic V
 
-\item \code{p_value}: Extract p-value
+\item \code{p_value(wilcoxon)}: Extract p-value
+
 }}
-
 \examples{
 
 # create wilcoxon object

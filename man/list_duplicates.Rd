@@ -29,13 +29,13 @@ Lists all duplicates as a list of tuples.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{character}: list duplicates for a \code{\link{character}} vector.
+\item \code{list_duplicates(character)}: list duplicates for a \code{\link{character}} vector.
 
-\item \code{tbl}: lists duplicates for a \code{\link{tibble}}.
+\item \code{list_duplicates(tbl)}: lists duplicates for a \code{\link{tibble}}.
 
-\item \code{data.frame}: lists duplicates for a \code{\link{data.frame}}.
+\item \code{list_duplicates(data.frame)}: lists duplicates for a \code{\link{data.frame}}.
+
 }}
-
 \examples{
 list_duplicates(c("a", "b", "c")) # list()
 list_duplicates(c("a", "b", "a", "c")) # list(c(1, 3))

@@ -36,10 +36,10 @@ Generic function for validation of file formats.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{litter}: validate litter data.
+\item \code{validate(litter)}: validate litter data.
 
-\item \code{litter_types}: validate litter_types file
+\item \code{validate(litter_types)}: validate litter_types file
 
-\item \code{settings}: validate settings file
+\item \code{validate(settings)}: validate settings file
+
 }}
-

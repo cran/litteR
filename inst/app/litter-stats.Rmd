@@ -13,6 +13,8 @@ logger$info("Entering descriptive statistics section")
 
 ## Descriptive statistics
 
+### Basic statistics
+
 ```{r, echo=FALSE}
 MIN_YEARS <- 5L
 MIN_SURVEYS <- 10L
@@ -106,9 +108,9 @@ For each location code and group/type name, the following statistics have been e
 
 -   relative count (`%TC`): the contribution of each litter type to the total count of litter types (%);
 
--   [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (`cv`): the ratio of the standard deviation to the mean of the counts for each litter type (%);
+-   [coefficient of variation](https://en.wikipedia.org/wiki/Coefficient_of_variation) (`cv`): the ratio of the standard deviation to the mean of the counts for each litter type (expressed as a fraction);
 
--   ratio of [mad](https://en.wikipedia.org/wiki/Median_absolute_deviation) and [median](https://en.wikipedia.org/wiki/Median) (`rmad`, %);
+-   ratio of [mad](https://en.wikipedia.org/wiki/Median_absolute_deviation) and [median](https://en.wikipedia.org/wiki/Median) (`rmad`, expressed as a fraction);
 
 -   number of surveys (`n`);
 
@@ -119,7 +121,7 @@ For each location code and group/type name, the following statistics have been e
     -   no monotonically *increasing* trend in case the Theil-Sen slope is greater than zero;
     -   no monotonically *decreasing* trend in case the Theil-Sen slope is smaller than zero;
 
-These statistics will be estimated for types with the greatest counts making up `r PERCENTAGE_TOTAL_COUNT`% of the total count for each location and for all groups specified in `r sQuote(path_file(FILE_TYPES))`.
+These statistics will be estimated for litter types with the greatest counts making up `r PERCENTAGE_TOTAL_COUNT`% of the total count for each location and for all groups specified in `r sQuote(path_file(FILE_TYPES))`.
 
 > These statistics have been stored in file `r sQuote(path_file(FILE_STATS))`.
 
@@ -174,7 +176,7 @@ d %>%
 logger$info("Table with litter statistics created")
 ```
 
-The statistics for the litter groups are given in the table below.
+The statistics for the litter groups are given in the table below. These group statistics are based on _all_ litter types and not only on those types with the highest counts.
 
 <br/>
 <br/>
@@ -185,6 +187,7 @@ d %>%
     rename(group_code = type_name) %>%
     mutate(across(where(is_double) & !p_value, ~ formatC(.x, format = "fg", digits = 4))) %>%
     mutate(p_value = formatC(p_value, format = "f", digits = 4)) %>%
+    rename(`p-value` = p_value) %>%
     kable(align = "llllrrrrrrrr")
 ```
 
@@ -193,7 +196,7 @@ d %>%
 
 The figures below show for each location code the median count for each group.
 
-```{r fig.width=5, fig.height=5, out.width=449}
+```{r fig.width=5, fig.height=5, out.width="50%"}
 d_stats %>%
     select(location_code, type_name, median) %>%
     filter(type_name == str_to_upper(type_name)) %>% # group codes
@@ -215,5 +218,56 @@ d_stats %>%
         coord_flip() +
         ggtitle(x$location_code[1])
       print(g)
+    })
+```
+
+<br/>
+<br/>
+
+### Top 10
+
+The table below gives for each location the top 10 of litter types, _i.e._, the 10 litter types with the highest median litter counts.
+
+```{r}
+logger$info("Creating table with top 10 of litter types for each location")
+
+d <- d_stats %>%
+    select(location_code, type_name, median) %>%
+    filter(type_name != str_to_upper(type_name)) %>% # remove group codes
+    group_split(location_code) %>%
+    map_df(function(x) {
+        x %>%
+            arrange(desc(median)) %>%
+            slice(1:10) %>%
+            mutate(rank = 1:n())}) %>%
+    select(location_code, rank, type_name, `median count` = median) 
+
+d %>%
+    kable(align = "lllr", digits = 1)
+```
+
+<br/>
+<br/>
+
+The figure(s) below show(s) for each location the top 10 of litter types.
+
+```{r fig.width=4, fig.height=3, out.width="50%"}
+logger$info("Creating figures with top 10 of litter types for each location")
+
+d %>%
+    group_split(location_code) %>%
+    walk(function(x) {
+        x$type_name <- factor(
+            x = x$type_name,
+            levels = rev(x$type_name),
+            ordered = TRUE)
+        g <- ggplot(data = x) +
+            geom_col(
+                mapping = aes(x = type_name, y = `median count`),
+                fill = "blue", alpha = 0.5) +
+            scale_x_discrete(name = "") +
+            coord_flip() +
+            ggtitle(x$location_code[1])
+        print(g)
     })
 ```

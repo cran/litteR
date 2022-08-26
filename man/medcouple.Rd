@@ -22,9 +22,9 @@ Robust statistic that quantifies the skewness of univariate distributions.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{default}: default method
-}}
+\item \code{medcouple(default)}: default method
 
+}}
 \note{
 This is a naive, but robust en simple implementation. For a more
 efficient implementation see package

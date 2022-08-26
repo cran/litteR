@@ -20,7 +20,7 @@ knitr::include_graphics("./fig/library-litter.png")
 knitr::include_graphics("./fig/file-open-dialogue.png")
 
 ## ---- message=FALSE, comment=NA-----------------------------------------------
-path_package("litteR", "extdata", "types-ospar-tc-sup-fish-plastic.csv") %>%
+path_package("litteR", "extdata", "types-ospar-sup-fish-other.csv") %>%
     read_csv(col_types = cols(
         type_name = col_character(),
         included = col_character(),

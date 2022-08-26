@@ -1,3 +1,11 @@
+# litteR 1.0.0 (2022-08-26)
+
+* updated existing type files
+* added top 10 of litter types for each location and region
+* updated the manual based on user inputs
+
+
+
 # litteR 0.9.1 (2021-09-21)
 
 * minor updates to vignette (cover page and DOI)

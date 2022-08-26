@@ -15,9 +15,9 @@ See Hubert & Vandervieren (2008, p.5191, Eq.5).
 }
 \section{Functions}{
 \itemize{
-\item \code{stat_adj_boxplot_outlier}: add outliers to adjusted boxplot
-}}
+\item \code{stat_adj_boxplot_outlier()}: add outliers to adjusted boxplot
 
+}}
 \examples{
 library(ggplot2)
 

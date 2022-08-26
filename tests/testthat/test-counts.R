@@ -5,7 +5,7 @@ test_that("counts are computed correctly", {
     # create litter project directory
     tmp_dir <- file.path(tempdir(), "litter-test")
     dir.create(tmp_dir)
-    create_litter_project(tmp_dir)
+    file.copy(from = list.files("./data", full.names = TRUE), to = tmp_dir)
 
     # run litteR
     result_dir <- litter(file.path(tmp_dir, "settings.yaml"))

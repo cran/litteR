@@ -28,9 +28,9 @@ Vandervieren (2008, p.5191, Eq.5).
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{default}: Adjusted Boxplot Statistics
-}}
+\item \code{adj_boxplot_stats(default)}: Adjusted Boxplot Statistics
 
+}}
 \examples{
 adj_boxplot_stats(rlnorm(100))
 }

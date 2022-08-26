@@ -27,11 +27,11 @@ Theil Sen Slope Estimator
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{slope}: Extract slope.
+\item \code{slope(theil_sen)}: Extract slope.
 
-\item \code{intercept}: Extract intercept.
+\item \code{intercept(theil_sen)}: Extract intercept.
+
 }}
-
 \examples{
 
 # create theil_sen object

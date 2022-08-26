@@ -15,7 +15,8 @@ mann_kendall(x, t = seq_along(x), type = c("both", "increasing", "decreasing"))
 \arguments{
 \item{x}{numeric vector representing a time-series.}
 
-\item{t}{time index}
+\item{t}{time index (a numeric vector, or a vector
+of class \code{\link{Date}}).}
 
 \item{type}{direction to test (both, increasing, or decreasing).}
 
@@ -29,15 +30,19 @@ Performs Mann-Kendall non-parametric test for trend.
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{test_statistic}: Extracts Mann Kendall tau
+\item \code{test_statistic(mann_kendall)}: Extracts Mann Kendall tau
 
-\item \code{p_value}: Extract p-value
+\item \code{p_value(mann_kendall)}: Extract p-value
+
 }}
-
 \examples{
 
 # create mann_kendall object
 mk <- mann_kendall(c(9, 4, 7, 5, 3), type = "decreasing")
+mk <- mann_kendall(
+  x = c(9, 4, 7, 5, 3),
+  t = c(1, 3, 2, 5, 9),
+  type = "decreasing")
 
 # get test statistic tau
 test_statistic(mk)

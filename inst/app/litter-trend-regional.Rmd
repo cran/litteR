@@ -16,7 +16,7 @@ For each region_code and the type names and group codes specified in the setting
 
 - the number of surveys (N);
 - Theil-Sen slope: the median of all [Theil-Sen slopes](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) within a region;
-- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed Regional Kendall test ([Van Belle & Hughes, 1984](http://dx.doi.org/10.1029/WR020i001p00127); [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring)) to test the null hypothesis of 
+- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed Regional Kendall test ([Van Belle & Hughes, 1984](https://dx.doi.org/10.1029/WR020i001p00127); [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring)) to test the null hypothesis of 
     - no monotonically _increasing_ trend in case the regional Theil-Sen slope is greater than zero;
     - no monotonically _decreasing_ trend in case the regional Theil-Sen slope is smaller than zero;
 

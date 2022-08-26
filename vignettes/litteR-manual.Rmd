@@ -5,6 +5,14 @@ date: |
     `r format(Sys.Date(), "%B %Y")`
     <br><br><br>
     `r knitr::include_graphics("./fig/beach-litter-cover-photo.png", dpi=96)`
+    <br><br>
+    <font size="1">
+        <i>
+            The litteR-software and this user manual have been commissioned by 
+            Rijkswaterstaat,<br>Ministry of Infrastructure and Water Management,
+            The Netherlands.
+        </i>
+    </font>
     <br><br><br>
 fontsize: 11pt
 output:
@@ -145,11 +153,11 @@ These input files are described below.
 ## Type file {#type_file}
 
 
-The type file contains a list of all litter types that are allowed to use in the [data file](#data_file). It also indicates to which litter group each litter type belongs. Two example files, named '`types-ospar.csv`' and '`types-ospar-tc-sup-fish-plastic.csv`' are automatically generated when using the `create_litter_project`-function, a described [earlier](#create_new_project) in this tutorial. A type file assigns each litter type (`type_name`) to one or more litter groups. The first 10 rows of '`types-ospar-tc-sup-fish-plastic.csv` are given in the table below.
+The type file contains a list of all litter types that are allowed to use in the [data file](#data_file). It also indicates to which litter group each litter type belongs. Two example files, named '`types-ospar-materials.csv`' and '`types-ospar-sup-fish-other.csv`' are automatically generated when using the `create_litter_project`-function, a described [earlier](#create_new_project) in this tutorial. A type file assigns each litter type (`type_name`) to one or more litter groups. The first 10 rows of '`types-ospar-sup-fish-other.csv` are given in the table below.
 
 <br>
 ```{r, message=FALSE, comment=NA}
-path_package("litteR", "extdata", "types-ospar-tc-sup-fish-plastic.csv") %>%
+path_package("litteR", "extdata", "types-ospar-sup-fish-other.csv") %>%
     read_csv(col_types = cols(
         type_name = col_character(),
         included = col_character(),
@@ -338,7 +346,7 @@ The settings-file contains the following entries:
 - `date_min` and `date_max`, the first and final date of the period to analyze. Dates should be given in [ISO](https://en.wikipedia.org/wiki/ISO_8601) format, _i.e._, YYYY-mm-dd (for example `r Sys.Date()`, to indicate `r format(Sys.Date(), "%e %B %Y")`);
 - `percentage_total_count`: the percentage of the total count used to estimate statistics. See the section on [descriptive statistics](#descriptive_statistics) for more information;
 - `file_data`: name of the [data file](#data_file) (including its path, _e.g._, c:/my-litter-directory/my-litter-data.csv);
-- `file_types`: name of the [type file](#type_file) (including its path, _e.g._, c:/my-litter-directory/types-ospar.csv);
+- `file_types`: name of the [type file](#type_file) (including its path, _e.g._, c:/my-litter-directory/types-ospar-materials.csv);
 - `location_code`: name(s) of the location(s) to plot. These should exist in column `location_code` in the [data file](#data_file). As mentioned in the [previous section](#data_file),`location_code`s should be readily interpretable for the user, as these codes are also used in the **litteR**-results (tables and plots);
 - `region_code`: name(s) of the region(s) to plot. These should exist in column `region_code` in the [data file](#data_file);
 - `group_code`: name(s) of group(s) to plot. Litter groups should be available as column names in the [type file](#type_file);
@@ -421,10 +429,8 @@ knitr::include_graphics("./fig/outlier.png")
 
 <br>
 
-
     
 ### Descriptive statistics {#descriptive_statistics}
-
 
 For each `location_code` and group/type name, the following statistics are estimated:
 
@@ -439,9 +445,11 @@ For each `location_code` and group/type name, the following statistics are estim
     - no monotonically _increasing_ trend in case the Theil-Sen slope is greater than zero;
     - no monotonically _decreasing_ trend in case the Theil-Sen slope is smaller than zero;
 
-These statistics will be estimated for all litter types with the greatest counts making up a percentage of the total count and for all litter groups. This percentage is given as `percentage_total_count` in the [settings file](#settings_file).
+These statistics will be estimated for litter types with the greatest counts making up a given percentage of the total count for each location and for all groups specified in the [type file](#type_file). This percentage needs to be provided as `percentage_total_count` in the [settings file](#settings_file).
 
 The descriptive statistics for the litter types and groups are stored in a CSV-file with a name starting with `litteR-results` and ending with a [timestamp](https://en.wikipedia.org/wiki/Timestamp). The statistics for litter groups are also printed as a table and shown as bar plots in the report: one plot for each `location_code` [column of the data file](#data_file). An example is given in the figure below. If you want other groups, or only a subset of groups, you should modify the [type file](#type_file).
+
+In addition to the statistics given above, the top 10 of litter types for each location is given in a table and as a figure. This top 10 is based on median litter counts.
 
 <br>
 
@@ -468,9 +476,11 @@ The summary statistics are:
 
 - regional `slope`: the median of the Theil-Sen slopes of the individual locations (`location_code`) within a region (`region_code`) for each litter group. Data from different locations have not been mixed in the computation of the Theil-Sen slopes. This method is similar to the one in Gilbert (1987) except that in our procedure all locations within a region contribute equally to the regional trend.
 
-- `p_value`: the p-values for each regional trend (`slope`) are computed by means of the expressions given in [Van Belle & Hughes, 1984](http://dx.doi.org/10.1029/WR020i001p00127) (Eqs. 2 and 7) and [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring) (Eqs. 17.1 - 17.5).
+- `p_value`: the p-values for each regional trend (`slope`) are computed by means of the expressions given in [Van Belle & Hughes, 1984](https://dx.doi.org/10.1029/WR020i001p00127) (Eqs. 2 and 7) and [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring) (Eqs. 17.1 - 17.5).
 
+In addition to the regional statistics given above, the top 10 of litter types for each region is given in a table and as a figure. This top 10 is based on median litter counts.
 
+<br>
 
 ### Trend analysis
 
@@ -501,7 +511,7 @@ For each `region_code`, and the type names and group codes specified in the [set
 
 - the number of surveys (N) in the region;
 - Theil-Sen slope: the median of all [Theil-Sen slopes](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator) within a region;
-- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed Regional Kendall test ([Van Belle & Hughes, 1984](http://dx.doi.org/10.1029/WR020i001p00127); [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring)) to test the null hypothesis of 
+- [p-value](https://en.wikipedia.org/wiki/P-value): the p-value associated with the one-tailed Regional Kendall test ([Van Belle & Hughes, 1984](https://dx.doi.org/10.1029/WR020i001p00127); [Gilbert, 1987](https://www.osti.gov/biblio/7037501-statistical-methods-environmental-pollution-monitoring)) to test the null hypothesis of 
     - no monotonically _increasing_ trend in case the regional Theil-Sen slope is greater than zero;
     - no monotonically _decreasing_ trend in case the regional Theil-Sen slope is smaller than zero;
 

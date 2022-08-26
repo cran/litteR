@@ -70,7 +70,8 @@ intercept <- function(x, ...) {
 #' Performs Mann-Kendall non-parametric test for trend.
 #'
 #' @param x numeric vector representing a time-series.
-#' @param t time index
+#' @param t time index (a numeric vector, or a vector
+#'   of class \code{\link{Date}}).
 #' @param type direction to test (both, increasing, or decreasing).
 #'
 #' @return object of class \code{Mann-Kendall}.
@@ -84,10 +85,17 @@ intercept <- function(x, ...) {
 #'
 #' # create mann_kendall object
 #' mk <- mann_kendall(c(9, 4, 7, 5, 3), type = "decreasing")
+#' mk <- mann_kendall(
+#'   x = c(9, 4, 7, 5, 3),
+#'   t = c(1, 3, 2, 5, 9),
+#'   type = "decreasing")
 mann_kendall <- function(x, t = seq_along(x),
                          type = c("both", "increasing", "decreasing")) {
     n <- length(x)
     stopifnot(length(t) == n)
+    o <- order(t)
+    t <- t[o]
+    x <- x[o]
     result <- list(
         p_value = NA_real_,
         tau = NA_real_
@@ -102,7 +110,7 @@ mann_kendall <- function(x, t = seq_along(x),
         )
         mk <- suppressWarnings(
             cor.test(
-                x = t,
+                x = as.numeric(t),
                 y = x,
                 alternative = alternative,
                 method = "kendall"

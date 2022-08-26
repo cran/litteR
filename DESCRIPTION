@@ -1,7 +1,7 @@
 Package: litteR
 Title: Litter Analysis
-Version: 0.9.1
-Date: 2021-09-21
+Version: 1.0.0
+Date: 2022-08-26
 Authors@R: c(person(given = "Dennis",
     family = "Walvoort", email = "dennis.Walvoort@wur.nl", role = c("aut",
     "cre", "cph")), person(given = "Willem", family = "van Loon", email =
@@ -26,12 +26,12 @@ Suggests: knitr, kableExtra, testthat (>= 2.3.2)
 License: GPL (>= 3)
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 NeedsCompilation: no
-Packaged: 2021-09-21 08:51:36 UTC; dennis
+Packaged: 2022-08-26 14:13:56 UTC; dennis
 Author: Dennis Walvoort [aut, cre, cph],
   Willem van Loon [aut, cph],
   Rijkswaterstaat - The Netherlands [cph, fnd, dtc]
 Maintainer: Dennis Walvoort <dennis.Walvoort@wur.nl>
 Repository: CRAN
-Date/Publication: 2021-09-21 09:10:02 UTC
+Date/Publication: 2022-08-26 19:32:06 UTC

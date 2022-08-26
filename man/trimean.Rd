@@ -25,9 +25,9 @@ quartiles respectively.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{default}: Tukey's trimean
-}}
+\item \code{trimean(default)}: Tukey's trimean
 
+}}
 \examples{
 stopifnot(trimean(0:100) == mean(0:100))
 stopifnot(trimean(0:100) == median(0:100))
